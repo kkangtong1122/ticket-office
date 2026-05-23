@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>🎟 티켓 메이커</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Noto+Serif+KR:wght@700&display=swap');
+@font-face{font-family:'Ridibatang';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff') format('woff');font-display:swap;}
+@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFLightA.woff') format('woff');font-weight:300;font-display:swap;}
+@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');font-weight:700;font-display:swap;}
+@font-face{font-family:'OngleipParkDahyeon';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');font-display:swap;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#eae6de;--pn:#fff;--bd:#ddd8cf;--tx:#1a1714;--mt:#8a847a;--ac:#c05020;--ui:'Noto Sans KR',sans-serif;--ckA:#e8e4dc;--ckB:#f2efea;}
+body{font-family:var(--ui);background:var(--bg);color:var(--tx);}
+body.dark{--bg:#1a1a1e;--pn:#252528;--bd:#3a3a40;--tx:#e0e0e4;--mt:#8a8a94;--ac:#e06030;}
+body.dark input[type=text],body.dark input[type=number],body.dark textarea,body.dark select{background:#2a2a30;color:#e0e0e4;border-color:#3a3a40;}
+body.dark .tb{background:#202024;}body.dark .pvh{background:#202024;}
+body.dark .sg button,body.dark .ec,body.dark .ip,body.dark .btc,body.dark .fd button{background:#2a2a30;}
+body.dark .tc{border-color:#444;}body.dark .iu{border-color:#444;}
+
+/* ══ DESKTOP LAYOUT ══ */
+.app{display:flex;height:100vh;}
+.panel{width:330px;flex-shrink:0;background:var(--pn);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;}
+.preview{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ══ MOBILE LAYOUT ══ */
+@media(max-width:700px){
+  .app{flex-direction:column-reverse;height:auto;min-height:100vh;}
+  .preview{flex:none;height:55vh;min-height:200px;}
+  .panel{width:100%;flex:1;border-right:none;border-top:1px solid var(--bd);max-height:45vh;}
+}
+
+/* ── Tab bar ── */
+.tb{display:flex;border-bottom:1px solid var(--bd);background:#f8f6f2;flex-shrink:0;}
+.tb button{flex:1;padding:.5rem 0;font-family:var(--ui);font-size:.68rem;font-weight:500;border:none;background:none;color:var(--mt);cursor:pointer;border-bottom:2px solid transparent;transition:.12s;}
+.tb button.on{color:var(--ac);border-bottom-color:var(--ac);}
+.tp{flex:1;overflow-y:auto;padding:.8rem;-webkit-overflow-scrolling:touch;}
+.tp::-webkit-scrollbar{width:3px;}.tp::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
+.pg{display:none;}.pg.on{display:flex;flex-direction:column;gap:.7rem;}
+
+/* ── Controls ── */
+.sc{font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mt);margin-bottom:.1rem;}
+.f{display:flex;flex-direction:column;gap:.12rem;}.f>label{font-size:.7rem;color:var(--mt);}
+.rw{display:flex;gap:4px;align-items:flex-end;}.rw>*{flex:1;}
+input[type=text],input[type=number],textarea,select{width:100%;font-family:var(--ui);font-size:.74rem;border:1px solid var(--bd);border-radius:5px;padding:.3rem .45rem;background:#faf9f7;color:var(--tx);}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ac);}
+textarea{resize:vertical;min-height:36px;line-height:1.4;}
+input[type=number]{width:50px;text-align:center;padding:.3rem .15rem;}
+input[type=range]{width:100%;accent-color:var(--ac);height:18px;}
+input[type=color]{width:26px;height:22px;border:1px solid var(--bd);border-radius:4px;padding:1px;cursor:pointer;background:#faf9f7;}
+.cr{display:flex;align-items:center;gap:.3rem;}.cr span{font-size:.7rem;color:var(--mt);flex:1;}
+
+/* seg buttons */
+.sg{display:flex;gap:2px;flex-wrap:wrap;}
+.sg button{flex:1;font-family:var(--ui);font-size:.65rem;padding:.26rem .08rem;border:1px solid var(--bd);border-radius:4px;background:#faf9f7;color:var(--mt);cursor:pointer;transition:.1s;white-space:nowrap;min-width:0;}
+.sg button.on{background:var(--tx);border-color:var(--tx);color:#fff;}
+
+/* multi-select seg */
+.ms button.on{background:var(--ac);border-color:var(--ac);color:#fff;}
+
+/* style btns */
+.sr{display:flex;gap:3px;}
+.sb2{font-family:var(--ui);font-size:.7rem;width:24px;height:22px;border:1px solid var(--bd);border-radius:3px;background:#faf9f7;color:var(--mt);cursor:pointer;}.sb2.on{background:var(--tx);border-color:var(--tx);color:#fff;}
+.sb2.fb{font-weight:700;}.sb2.fi{font-style:italic;}.sb2.fu{text-decoration:underline;}.sb2.fs{text-decoration:line-through;}
+
+/* theme grid */
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+.tc{cursor:pointer;border-radius:5px;padding:3px;font-size:.56rem;font-weight:500;border:2px solid transparent;text-align:center;transition:.1s;line-height:1.1;}.tc.on{border-color:var(--ac);}
+
+/* edge grid */
+.eg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
+.ec{cursor:pointer;border:1.5px solid var(--bd);border-radius:5px;padding:2px 1px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:.1s;background:#faf9f7;}
+.ec:hover{border-color:var(--mt);}.ec.on{border-color:var(--ac);background:#fef6f2;}
+.ec span{font-size:.5rem;color:var(--mt);}.ec.on span{color:var(--ac);}
+
+/* image pos */
+.ipg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;}
+.ip{cursor:pointer;border:1.5px solid var(--bd);border-radius:4px;padding:2px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:.1s;background:#faf9f7;}
+.ip:hover{border-color:var(--mt);}.ip.on{border-color:var(--ac);background:#fef6f2;}
+.ip span{font-size:.48rem;color:var(--mt);}.ip.on span{color:var(--ac);}
+
+/* image upload */
+.iu{border:1.5px dashed var(--bd);border-radius:6px;padding:.3rem;text-align:center;font-size:.68rem;color:var(--mt);cursor:pointer;position:relative;}
+.iu:hover{border-color:var(--ac);color:var(--ac);}.iu input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.iv{width:100%;height:44px;object-fit:cover;border-radius:4px;display:none;margin-top:3px;}
+.ic{display:none;width:100%;font-family:var(--ui);font-size:.62rem;padding:.15rem;background:none;border:1px solid var(--bd);border-radius:3px;color:var(--mt);cursor:pointer;margin-top:2px;}
+
+/* toggle */
+.tog{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.7rem;color:var(--mt);user-select:none;}
+.tog input{display:none;}.tog .t{width:28px;height:15px;border-radius:8px;background:var(--bd);position:relative;transition:.15s;flex-shrink:0;}
+.tog input:checked+.t{background:var(--ac);}.tog .t::after{content:'';position:absolute;top:1.5px;left:1.5px;width:12px;height:12px;border-radius:50%;background:#fff;transition:.15s;}
+.tog input:checked+.t::after{left:14.5px;}
+
+.fr{display:flex;gap:4px;align-items:flex-end;}.fr>.f{flex:1;}.fr>.sz{width:46px;flex-shrink:0;}
+.dv{border:none;border-top:1px solid var(--bd);margin:.1rem 0;}
+
+/* back templates */
+.btg{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+.btc{cursor:pointer;border:1.5px solid var(--bd);border-radius:5px;padding:3px 2px;text-align:center;font-size:.56rem;color:var(--mt);transition:.1s;background:#faf9f7;}
+.btc:hover{border-color:var(--mt);}.btc.on{border-color:var(--ac);background:#fef6f2;color:var(--ac);}
+
+/* ── Preview ── */
+.pvh{display:flex;align-items:center;justify-content:space-between;padding:.4rem .6rem;border-bottom:1px solid var(--bd);background:#f8f6f2;flex-shrink:0;flex-wrap:wrap;gap:3px;}
+.pvt{display:flex;gap:3px;}.pt{font-family:var(--ui);font-size:.68rem;font-weight:500;padding:.28rem .6rem;border:1px solid var(--bd);border-radius:14px;background:var(--pn);color:var(--mt);cursor:pointer;}.pt.on{background:var(--tx);border-color:var(--tx);color:#fff;}
+.pa{display:flex;gap:3px;flex-wrap:wrap;}
+.pb{font-family:var(--ui);font-size:.62rem;font-weight:500;padding:.22rem .45rem;border:1px solid var(--bd);border-radius:5px;background:var(--pn);color:var(--mt);cursor:pointer;transition:.1s;}
+.pb:hover{background:var(--tx);color:#fff;border-color:var(--tx);}.pb.pr{background:var(--tx);color:#fff;border-color:var(--tx);}
+.pc{flex:1;display:flex;align-items:center;justify-content:center;padding:1rem;overflow:auto;background:repeating-conic-gradient(var(--ckA) 0% 25%,var(--ckB) 0% 50%) 0 0/16px 16px;}
+.pc svg{display:block;overflow:visible;max-width:100%;max-height:100%;}
+
+/* fade direction icons */
+.fd{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}.fd button{font-family:var(--ui);font-size:.7rem;padding:.25rem;border:1px solid var(--bd);border-radius:4px;background:#faf9f7;color:var(--mt);cursor:pointer;}.fd button.on{background:var(--ac);border-color:var(--ac);color:#fff;}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ PANEL ═══ -->
+<div class="panel">
+<div class="tb">
+<button class="on" data-t="design">🎨디자인</button>
+<button data-t="front">앞면</button>
+<button data-t="back">뒷면</button>
+</div>
+<div class="tp">
+
+<!-- TAB: 디자인 -->
+<div class="pg on" data-t="design">
+<div><div class="sc">테마</div><div class="tg" id="tGrid"></div></div>
+<div><div class="sc">방향</div><div class="sg" id="sgO"><button class="on" data-v="landscape">가로형</button><button data-v="portrait">세로형</button></div></div>
+<div><div class="sc">모서리</div><div class="eg" id="eGrid"></div></div>
+<div><div class="sc">크기 (px)</div>
+<div class="rw"><div class="f"><label>너비</label><input type="number" id="tW" value="500" min="200" max="900" step="10"></div><div class="f"><label>높이</label><input type="number" id="tH" value="210" min="100" max="600" step="10"></div><div class="f"><label>절취</label><input type="number" id="tS" value="130" min="40" max="250" step="5"></div></div></div>
+<hr class="dv">
+<div><div class="sc">색상</div>
+<div class="cr"><span>배경</span><input type="color" id="cBg" value="#f5f0e0"></div>
+<div class="cr"><span>강조</span><input type="color" id="cAc" value="#c8410a"></div>
+<div class="cr"><span>텍스트</span><input type="color" id="cTx" value="#2a1f10"></div>
+<div class="cr"><span>서브</span><input type="color" id="cSb" value="#8a6a40"></div></div>
+<hr class="dv">
+<div><div class="sc">강조 띠 (복수 선택 가능)</div>
+<label class="tog"><input type="checkbox" id="stOn" checked><span class="t"></span>띠 표시</label>
+<div class="sg ms" id="sgSP" style="margin-top:4px;">
+<button class="on" data-v="left">왼쪽</button><button data-v="right">오른쪽</button><button data-v="top">상단</button><button data-v="bottom">하단</button>
+</div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label>두께</label><input type="number" id="stW" value="6" min="1" max="30"></div></div></div>
+<hr class="dv">
+<div><div class="sc">바코드</div>
+<div class="sg" id="sgBC"><button class="on" data-v="barcode">바코드</button><button data-v="none">없음</button></div>
+<div id="bdRow" style="margin-top:3px;"><label style="font-size:.68rem;color:var(--mt);">밀도 <span id="dVal">20</span>줄</label><input type="range" id="bDen" min="8" max="60" step="2" value="20"></div></div>
+<hr class="dv">
+<div><div class="sc">장식</div>
+<label class="tog"><input type="checkbox" id="decDots" checked><span class="t"></span>장식 도트라인</label>
+<label class="tog" style="margin-top:3px;"><input type="checkbox" id="decBorder" checked><span class="t"></span>내부 테두리선</label>
+</div>
+<hr class="dv">
+<div><div class="sc">작업 환경</div>
+<div style="margin-bottom:3px;"><label style="font-size:.66rem;color:var(--mt);">에디터 UI</label>
+<div class="sg" id="sgMode"><button class="on" data-v="light">☀️ 밝게</button><button data-v="dark">🌙 어둡게</button></div></div>
+<div><label style="font-size:.66rem;color:var(--mt);">미리보기 배경</label>
+<div class="sg" id="sgBg"><button class="on" data-v="check-light">체크 밝게</button><button data-v="check-dark">체크 어둡게</button><button data-v="white">흰색</button><button data-v="black">검정</button></div></div>
+</div>
+</div>
+
+<!-- TAB: 앞면 -->
+<div class="pg" data-t="front">
+<div><div class="sc">메인 제목</div>
+<div class="f"><input type="text" id="fT" value="" placeholder="제목을 입력하세요"></div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label>폰트</label><select id="fnT"></select></div><div class="sz" style="width:46px;"><label>크기</label><input type="number" id="tsz" value="0" min="0" max="120" placeholder="자동"></div></div>
+<div class="sr" style="margin-top:3px;"><button class="sb2 fb" data-f="tB">B</button><button class="sb2 fi" data-f="tI">I</button><button class="sb2 fu" data-f="tU">U</button><button class="sb2 fs" data-f="tS">S</button></div></div>
+<div><div class="sc">부제목</div>
+<div class="f"><input type="text" id="fSb" value="" placeholder="부제목을 입력하세요"></div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label>폰트</label><select id="fnS"></select></div><div class="sz" style="width:46px;"><label>크기</label><input type="number" id="ssz" value="11" min="5" max="40"></div></div>
+<div class="sr" style="margin-top:3px;"><button class="sb2 fb" data-f="sB">B</button><button class="sb2 fi" data-f="sI">I</button><button class="sb2 fu" data-f="sU">U</button><button class="sb2 fs" data-f="sS">S</button></div></div>
+<div><div class="sc">날짜 · 장소</div>
+<div class="fr"><div class="f"><input type="text" id="fDt" value="" placeholder="날짜"></div><div class="sz"><input type="number" id="dSz" value="9" min="5" max="28"></div></div>
+<div class="fr" style="margin-top:3px;"><div class="f"><input type="text" id="fVn" value="" placeholder="장소"></div><div class="sz"><input type="number" id="vSz" value="10" min="5" max="28"></div></div></div>
+<hr class="dv">
+<div><div class="sc">절취 구역 텍스트</div>
+<div class="fr"><div class="f"><label>티켓 번호</label><input type="text" id="bCd" value="" placeholder="TK-0000-00000"></div><div class="sz"><input type="number" id="cdSz" value="7" min="4" max="16" step="0.5"></div></div>
+<div class="fr" style="margin-top:3px;"><div class="f"><label>바코드 텍스트</label><input type="text" id="bcTx" value="" placeholder="ADMIT ONE"></div><div class="sz"><input type="number" id="bcSz" value="7.5" min="4" max="16" step="0.5"></div></div></div>
+<hr class="dv">
+<div><div class="sc">앞면 이미지</div>
+<div class="iu">📷 이미지 업로드<input type="file" id="fIF" accept="image/*"></div>
+<img id="fITh" class="iv" alt=""><button class="ic" id="fICl">✕ 제거</button>
+<div class="f" style="margin-top:3px;"><label>URL</label><input type="text" id="fIU" placeholder="https://..."></div>
+<div style="margin-top:4px;"><label style="font-size:.66rem;color:var(--mt);">위치</label><div class="ipg" id="fIPG"></div></div>
+<div class="rw" style="margin-top:4px;">
+<div class="f"><label>가로(W)</label><input type="number" id="fIW" value="0" min="0" max="500" step="1" placeholder="자동"></div>
+<div class="f"><label>세로(H)</label><input type="number" id="fIH" value="0" min="0" max="500" step="1" placeholder="자동"></div>
+<div class="f"><label>배율 <span id="fISzV">100</span>%</label><input type="range" id="fISz" min="20" max="200" value="100"></div>
+</div>
+<div class="rw" style="margin-top:3px;">
+<div class="f"><label>둥글기 <span id="fIRdV">4</span>px</label><input type="range" id="fIRd" min="0" max="100" value="4"></div>
+</div>
+<div style="margin-top:4px;"><label style="font-size:.66rem;color:var(--mt);">테두리</label>
+<div class="rw">
+<div class="f"><label>두께</label><input type="number" id="fIBd" value="0" min="0" max="10" step="1"></div>
+<div class="f"><label>스타일</label><select id="fIBdSt"><option value="solid">실선</option><option value="dashed">대시</option><option value="dotted">점선</option><option value="double">겹선</option><option value="double-thick">굵은겹선</option></select></div>
+<div class="cr"><span>색</span><input type="color" id="fIBdC" value="#ffffff"></div>
+</div></div>
+<div class="rw" style="margin-top:4px;"><div class="f"><label>투명도 <span id="fIOpV">100%</span></label><input type="range" id="fIOp" min="0" max="100" value="100"></div></div>
+<div class="rw" style="margin-top:3px;">
+<div class="f"><label>X 오프셋</label><input type="number" id="fIOx" value="0" step="1"></div>
+<div class="f"><label>Y 오프셋</label><input type="number" id="fIOy" value="0" step="1"></div>
+</div>
+<div style="margin-top:5px;"><div class="sc">가장자리 페이드</div>
+<label class="tog"><input type="checkbox" id="fFdOn"><span class="t"></span>페이드 효과</label>
+<div id="fFdOpts" style="display:none;margin-top:4px;">
+<div class="fd" id="fFdDir"><button class="on" data-v="right">→</button><button data-v="left">←</button><button data-v="down">↓</button><button data-v="up">↑</button></div>
+<div class="f" style="margin-top:3px;"><label>페이드 범위 <span id="fFdRV">40%</span></label><input type="range" id="fFdR" min="10" max="80" value="40"></div>
+<div class="rw" style="margin-top:3px;"><div class="cr"><span>색상</span><input type="color" id="fFdCol" value="#f5f0e0"></div>
+<label class="tog" style="margin-left:6px;"><input type="checkbox" id="fFdTr"><span class="t"></span>투명</label></div>
+</div></div>
+</div>
+</div>
+
+<!-- TAB: 뒷면 -->
+<div class="pg" data-t="back">
+<div><div class="sc">뒷면 레이아웃</div>
+<div class="btg" id="bkTpl">
+<div class="btc on" data-v="default">📋 기본</div>
+<div class="btc" data-v="split">📊 좌우분할</div>
+<div class="btc" data-v="card">🎴 카드형</div>
+<div class="btc" data-v="simple">✨ 심플</div>
+</div></div>
+<div><div class="sc">이벤트명</div>
+<div class="fr"><div class="f"><input type="text" id="bTt" value="" placeholder="이벤트명을 입력하세요"></div><div class="sz"><input type="number" id="btSz" value="18" min="8" max="40"></div></div></div>
+<div><div class="sc">정보 항목 (라벨 · 값)</div>
+<div class="rw" style="margin-bottom:3px;">
+<div class="f" style="width:55px;flex:none;"><label>라벨</label><input type="text" id="bL1" value="좌석" placeholder="라벨1"></div>
+<div class="f"><label>값</label><input type="text" id="bSt" value="" placeholder="좌석 정보"></div>
+<div class="sz"><label>크기</label><input type="number" id="biSz" value="10" min="5" max="24"></div>
+</div>
+<div class="rw" style="margin-bottom:3px;">
+<div class="f" style="width:55px;flex:none;"><input type="text" id="bL2" value="날짜" placeholder="라벨2"></div>
+<div class="f"><input type="text" id="bV2" value="" placeholder="날짜 정보"></div>
+</div>
+<div class="rw" style="margin-bottom:3px;">
+<div class="f" style="width:55px;flex:none;"><input type="text" id="bL3" value="장소" placeholder="라벨3"></div>
+<div class="f"><input type="text" id="bV3" value="" placeholder="장소 정보"></div>
+</div>
+<div class="rw">
+<div class="f" style="width:55px;flex:none;"><input type="text" id="bL4" value="가격" placeholder="라벨4"></div>
+<div class="f"><input type="text" id="bPr" value="" placeholder="가격"></div>
+</div>
+</div>
+<div><div class="sc">안내사항</div>
+<div class="fr"><div class="f"><textarea id="bNt" placeholder="안내사항을 입력하세요"></textarea></div><div class="sz"><input type="number" id="bnSz" value="8.5" min="5" max="20" step="0.5"></div></div></div>
+<hr class="dv">
+<div><div class="sc">뒷면 이미지</div>
+<div class="iu">📷 이미지 업로드<input type="file" id="bIF" accept="image/*"></div>
+<img id="bITh" class="iv" alt=""><button class="ic" id="bICl">✕ 제거</button>
+<div class="f" style="margin-top:3px;"><label>URL</label><input type="text" id="bIU" placeholder="https://..."></div>
+<div style="margin-top:4px;"><label style="font-size:.66rem;color:var(--mt);">위치</label><div class="ipg" id="bIPG"></div></div>
+<div class="rw" style="margin-top:4px;">
+<div class="f"><label>가로(W)</label><input type="number" id="bIW" value="0" min="0" max="500" step="1" placeholder="자동"></div>
+<div class="f"><label>세로(H)</label><input type="number" id="bIH" value="0" min="0" max="500" step="1" placeholder="자동"></div>
+<div class="f"><label>배율 <span id="bISzV">100</span>%</label><input type="range" id="bISz" min="20" max="200" value="100"></div>
+</div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label>둥글기 <span id="bIRdV">4</span>px</label><input type="range" id="bIRd" min="0" max="100" value="4"></div></div>
+<div style="margin-top:4px;"><label style="font-size:.66rem;color:var(--mt);">테두리</label>
+<div class="rw">
+<div class="f"><label>두께</label><input type="number" id="bIBd" value="0" min="0" max="10" step="1"></div>
+<div class="f"><label>스타일</label><select id="bIBdSt"><option value="solid">실선</option><option value="dashed">대시</option><option value="dotted">점선</option><option value="double">겹선</option><option value="double-thick">굵은겹선</option></select></div>
+<div class="cr"><span>색</span><input type="color" id="bIBdC" value="#ffffff"></div>
+</div></div>
+<div class="rw" style="margin-top:4px;"><div class="f"><label>투명도 <span id="bIOpV">100%</span></label><input type="range" id="bIOp" min="0" max="100" value="100"></div></div>
+<div class="rw" style="margin-top:3px;">
+<div class="f"><label>X 오프셋</label><input type="number" id="bIOx" value="0" step="1"></div>
+<div class="f"><label>Y 오프셋</label><input type="number" id="bIOy" value="0" step="1"></div>
+</div>
+<div style="margin-top:5px;"><div class="sc">가장자리 페이드</div>
+<label class="tog"><input type="checkbox" id="bFdOn"><span class="t"></span>페이드 효과</label>
+<div id="bFdOpts" style="display:none;margin-top:4px;">
+<div class="fd" id="bFdDir"><button class="on" data-v="right">→</button><button data-v="left">←</button><button data-v="down">↓</button><button data-v="up">↑</button></div>
+<div class="f" style="margin-top:3px;"><label>페이드 범위 <span id="bFdRV">40%</span></label><input type="range" id="bFdR" min="10" max="80" value="40"></div>
+<div class="rw" style="margin-top:3px;"><div class="cr"><span>색상</span><input type="color" id="bFdCol" value="#f5f0e0"></div>
+<label class="tog" style="margin-left:6px;"><input type="checkbox" id="bFdTr"><span class="t"></span>투명</label></div>
+</div></div>
+</div>
+</div>
+
+</div></div>
+
+<!-- ═══ PREVIEW ═══ -->
+<div class="preview">
+<div class="pvh">
+<div class="pvt"><button class="pt on" data-s="front">앞면</button><button class="pt" data-s="back">뒷면</button></div>
+<div class="pa">
+<button class="pb" id="dPF">PNG앞</button><button class="pb" id="dPB">PNG뒤</button>
+<button class="pb" id="dHF">HTML앞</button><button class="pb" id="dHB">HTML뒤</button>
+<button class="pb pr" id="dHA">HTML전체</button>
+<button class="pb" id="dSV">SVG</button>
+<button class="pb" id="cpH" title="HTML 코드 클립보드 복사">📋코드복사</button>
+<button class="pb" id="cpBlog" title="블로그 붙여넣기용 (인라인 SVG)">📝블로그용</button>
+</div></div>
+<div class="pc" id="cv"><svg id="tSvg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+</div>
+</div>
+
+<script>
+const TH=[
+{id:'retro',n:'🎪레트로',bg:'#f5f0e0',ac:'#c8410a',tx:'#2a1f10',sb:'#8a6a40',f1:"'Bebas Neue',sans-serif",f2:"'DM Mono',monospace",bd:'#c8a060'},
+{id:'classic',n:'🎭클래식',bg:'#1a1008',ac:'#d4a830',tx:'#f5e8c0',sb:'#a08040',f1:"'Playfair Display',serif",f2:"'DM Mono',monospace",bd:'#d4a830'},
+{id:'minimal',n:'⬜미니멀',bg:'#fff',ac:'#111',tx:'#111',sb:'#888',f1:"'Bebas Neue',sans-serif",f2:"'Noto Sans KR',sans-serif",bd:'#ddd'},
+{id:'pastel',n:'🌸파스텔',bg:'#fce8f0',ac:'#e060a0',tx:'#3a1a28',sb:'#c080a0',f1:"'Noto Serif KR',serif",f2:"'Noto Sans KR',sans-serif",bd:'#e8b0cc'},
+{id:'dark',n:'🌑다크',bg:'#0e0e14',ac:'#6060ff',tx:'#e0e0ff',sb:'#6060aa',f1:"'Bebas Neue',sans-serif",f2:"'DM Mono',monospace",bd:'#3030aa'},
+{id:'concert',n:'🎸콘서트',bg:'#1a0a00',ac:'#ff6010',tx:'#fff0d8',sb:'#cc8040',f1:"'Bebas Neue',sans-serif",f2:"'DM Mono',monospace",bd:'#ff6010'},
+{id:'vintage',n:'🍂빈티지',bg:'#e8dcc8',ac:'#6a3820',tx:'#2a1810',sb:'#7a5840',f1:"'Playfair Display',serif",f2:"'DM Mono',monospace",bd:'#9a6a40'},
+{id:'neon',n:'🟢네온',bg:'#040810',ac:'#00ff88',tx:'#00ff88',sb:'#008844',f1:"'Bebas Neue',sans-serif",f2:"'DM Mono',monospace",bd:'#00aa44'},
+{id:'cream',n:'☕크림',bg:'#f0e8d8',ac:'#804020',tx:'#2a1810',sb:'#9a7858',f1:"'Noto Serif KR',serif",f2:"'Noto Sans KR',sans-serif",bd:'#c09870'},
+{id:'hanok',n:'🏮한옥',bg:'#f8f0e0',ac:'#8b0000',tx:'#2a1000',sb:'#7a4820',f1:"'Ridibatang',serif",f2:"'Nanum Myeongjo',serif",bd:'#c04020'},
+{id:'school',n:'✏️학교',bg:'#fffde8',ac:'#2060c0',tx:'#1a2040',sb:'#6080a0',f1:"'GangwonEduModu',sans-serif",f2:"'Nanum Gothic',sans-serif",bd:'#80a0d0'},
+{id:'spring',n:'🌿봄날',bg:'#f0f8e8',ac:'#3a8020',tx:'#1a3010',sb:'#6a9050',f1:"'OngleipParkDahyeon',sans-serif",f2:"'Noto Sans KR',sans-serif",bd:'#80c060'},
+];
+const FN=[['','기본'],["'Noto Sans KR',sans-serif",'Noto Sans'],["'Nanum Gothic',sans-serif",'나눔고딕'],["'Nanum Myeongjo',serif",'나눔명조'],["'Ridibatang',serif",'리디바탕'],["'GangwonEduModu',sans-serif",'강원교육'],["'OngleipParkDahyeon',sans-serif",'온글잎'],["'Playfair Display',serif",'Playfair'],["'DM Mono',monospace",'DM Mono'],["'Noto Serif KR',serif",'Noto Serif'],["Georgia,serif",'Georgia'],["Arial,sans-serif",'Arial']];
+const IPS=[{id:'none',n:'없음'},{id:'left',n:'왼쪽'},{id:'right',n:'오른쪽'},{id:'top',n:'상단'},{id:'bottom',n:'하단'},{id:'bg',n:'배경'},{id:'center',n:'중앙'},{id:'full',n:'전체'},{id:'corner',n:'모서리'},{id:'custom',n:'자유'}];
+const EDS=[{id:'straight',n:'직선'},{id:'round',n:'둥글게'},{id:'roundXL',n:'크게둥근'},{id:'chamfer',n:'사선컷'},{id:'waveS',n:'물결소'},{id:'waveL',n:'물결대'},{id:'zigS',n:'톱니소'},{id:'zigL',n:'톱니대'},{id:'scallop',n:'반원패임'},{id:'stamp',n:'스탬프'}];
+
+const S={theme:'retro',orient:'landscape',edge:'straight',side:'front',fIP:'none',bIP:'none',bkTpl:'default',
+cBg:'#f5f0e0',cAc:'#c8410a',cTx:'#2a1f10',cSb:'#8a6a40',tW:500,tH:210,tS:130,
+stOn:true,stPos:['left'],stW:6,bcSt:'barcode',bDen:20,
+fT:'',fSb:'',fDt:'',fVn:'',
+bTt:'',bSt:'',bPr:'',bNt:'',bCd:'',bcTx:'',
+bL1:'좌석',bL2:'날짜',bL3:'장소',bL4:'가격',bV2:'',bV3:'',
+fnT:'',fnS:'',tsz:0,ssz:11,dSz:9,vSz:10,btSz:18,biSz:10,bnSz:8.5,cdSz:7,bcSz:7.5,
+tB:false,tI:false,tU:false,tS2:false,sB:false,sI:false,sU:false,sS:false,
+fID:'',fIU:'',fIOp:100,fIOx:0,fIOy:0,fFdOn:false,fFdDir:'right',fFdR:40,fFdCol:'#f5f0e0',fFdTr:false,fISz:100,fIW:0,fIH:0,fIRd:4,fIBd:0,fIBdC:'#ffffff',fIBdSt:'solid',
+bID:'',bIU:'',bIOp:100,bIOx:0,bIOy:0,bFdOn:false,bFdDir:'right',bFdR:40,bFdCol:'#f5f0e0',bFdTr:false,bISz:100,bIW:0,bIH:0,bIRd:4,bIBd:0,bIBdC:'#ffffff',bIBdSt:'solid',
+decDots:true,decBorder:true};
+
+function gt(){return TH.find(t=>t.id===S.theme)||TH[0];}
+function hx(c){if(!c)return'#000';if(c[0]==='#'&&c.length===7)return c;const v=document.createElement('canvas').getContext('2d');v.fillStyle=c;return v.fillStyle;}
+function rgba(h,a=1){if(!h||h.length<7)return`rgba(0,0,0,${a})`;return`rgba(${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)},${a})`;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// tabs
+document.querySelectorAll('.tb button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tb button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelector(`.pg[data-t="${b.dataset.t}"]`).classList.add('on');}));
+document.querySelectorAll('.pt').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pt').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.side=b.dataset.s;render();}));
+['fnT','fnS'].forEach(id=>{const s=document.getElementById(id);FN.forEach(([v,n])=>{const o=document.createElement('option');o.value=v;o.textContent=n;s.appendChild(o);});});
+
+// theme
+const tgE=document.getElementById('tGrid');
+TH.forEach(t=>{const d=document.createElement('div');d.className='tc'+(t.id===S.theme?' on':'');d.dataset.id=t.id;d.style.cssText=`background:${t.bg};color:${t.tx};border-color:${t.id===S.theme?t.ac:t.bd}`;d.textContent=t.n;d.addEventListener('click',()=>{S.theme=t.id;S.cBg=t.bg;S.cAc=t.ac;S.cTx=t.tx;S.cSb=t.sb;['cBg','cAc','cTx','cSb'].forEach(k=>document.getElementById(k).value=hx(S[k]));tgE.querySelectorAll('.tc').forEach(c=>{c.classList.toggle('on',c.dataset.id===t.id);c.style.borderColor=c.dataset.id===t.id?TH.find(x=>x.id===c.dataset.id).ac:TH.find(x=>x.id===c.dataset.id).bd;});render();});tgE.appendChild(d);});
+
+// edge
+function epP(id){const W=36,H=16;const p={straight:`M0,0H${W}V${H}H0Z`,round:`M4,0H${W-4}Q${W},0,${W},4V${H-4}Q${W},${H},${W-4},${H}H4Q0,${H},0,${H-4}V4Q0,0,4,0Z`,roundXL:`M8,0H${W-8}Q${W},0,${W},8V${H-8}Q${W},${H},${W-8},${H}H8Q0,${H},0,${H-8}V8Q0,0,8,0Z`,chamfer:`M4,0H${W-4}L${W},4V${H-4}L${W-4},${H}H4L0,${H-4}V4Z`};if(p[id])return p[id];const cfg={waveS:[4,2],waveL:[3,3],zigS:[5,2],zigL:[3,3],scallop:[4,2],stamp:[4,2]};const[n,a]=cfg[id]||[4,2];const s=H/n;if(id.startsWith('wave')){let d=`M0,0H${W} `;for(let i=0;i<n;i++){d+=`C${W+a},${i*s},${W+a},${(i+1)*s},${W},${(i+1)*s} `;}d+=`H0 `;for(let i=n;i>0;i--){d+=`C${-a},${i*s},${-a},${(i-1)*s},0,${(i-1)*s} `;}return d+'Z';}if(id.startsWith('zig')){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`L${W-a},${i*s+s/2}L${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`L${a},${(i-1)*s+s/2}L0,${(i-1)*s} `;return d+'Z';}if(id==='scallop'){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`A${a},${a},0,0,0,${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`A${a},${a},0,0,0,0,${(i-1)*s} `;return d+'Z';}if(id==='stamp'){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`A${a},${a},0,0,1,${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`A${a},${a},0,0,1,0,${(i-1)*s} `;return d+'Z';}return`M0,0H${W}V${H}H0Z`;}
+const egE=document.getElementById('eGrid');EDS.forEach(e=>{const d=document.createElement('div');d.className='ec'+(e.id===S.edge?' on':'');d.dataset.v=e.id;d.innerHTML=`<svg width="36" height="16" viewBox="0 0 36 16"><path d="${epP(e.id)}" fill="none" stroke="currentColor" stroke-width="1"/></svg><span>${e.n}</span>`;d.addEventListener('click',()=>{S.edge=e.id;egE.querySelectorAll('.ec').forEach(c=>c.classList.toggle('on',c.dataset.v===e.id));render();});egE.appendChild(d);});
+
+// img pos
+function ipI(id){const s=18,r=`<rect width="${s}" height="${s}" rx="1" fill="none" stroke="currentColor" stroke-width=".7" opacity=".3"/>`;const m={none:'',left:`<rect x="1" y="1" width="5" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,right:`<rect x="${s-6}" y="1" width="5" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,top:`<rect x="1" y="1" width="${s-2}" height="5" rx=".5" fill="currentColor" opacity=".4"/>`,bottom:`<rect x="1" y="${s-6}" width="${s-2}" height="5" rx=".5" fill="currentColor" opacity=".4"/>`,bg:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".12"/>`,center:`<circle cx="${s/2}" cy="${s/2}" r="4" fill="currentColor" opacity=".3"/>`,full:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".3"/>`,corner:`<rect x="${s-7}" y="${s-7}" width="6" height="6" rx=".5" fill="currentColor" opacity=".4"/>`,custom:`<circle cx="${s/2}" cy="${s/2}" r="2" fill="currentColor" opacity=".5"/><line x1="3" y1="${s/2}" x2="${s-3}" y2="${s/2}" stroke="currentColor" stroke-width=".5" opacity=".3"/><line x1="${s/2}" y1="3" x2="${s/2}" y2="${s-3}" stroke="currentColor" stroke-width=".5" opacity=".3"/>`};return`<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">${r}${m[id]||''}</svg>`;}
+function bIP(elId,sk){const el=document.getElementById(elId);IPS.forEach(p=>{const d=document.createElement('div');d.className='ip'+(p.id===S[sk]?' on':'');d.dataset.v=p.id;d.innerHTML=ipI(p.id)+`<span>${p.n}</span>`;d.addEventListener('click',()=>{S[sk]=p.id;el.querySelectorAll('.ip').forEach(c=>c.classList.toggle('on',c.dataset.v===p.id));render();});el.appendChild(d);});}
+bIP('fIPG','fIP');bIP('bIPG','bIP');
+
+// back template
+document.querySelectorAll('#bkTpl .btc').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#bkTpl .btc').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.bkTpl=b.dataset.v;render();}));
+
+// seg (single select)
+function sg(id,k,cb){document.getElementById(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[k]=b.dataset.v;if(cb)cb();render();}));}
+sg('sgO','orient',()=>{if(S.orient==='landscape'){S.tW=500;S.tH=210;S.tS=130;}else{S.tW=220;S.tH=380;S.tS=110;}document.getElementById('tW').value=S.tW;document.getElementById('tH').value=S.tH;document.getElementById('tS').value=S.tS;});
+sg('sgBC','bcSt',()=>{document.getElementById('bdRow').style.display=S.bcSt==='barcode'?'':'none';});
+
+// strip multi-select
+document.getElementById('sgSP').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  b.classList.toggle('on');
+  S.stPos=[];document.getElementById('sgSP').querySelectorAll('button.on').forEach(x=>S.stPos.push(x.dataset.v));
+  render();
+}));
+
+// fade direction (single select per side)
+function fdSg(id,key){document.getElementById(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[key]=b.dataset.v;render();}));}
+fdSg('fFdDir','fFdDir');fdSg('bFdDir','bFdDir');
+
+// inputs
+['fT','fSb','fDt','fVn','bTt','bSt','bPr','bNt','bCd','bcTx','fIU','bIU','bL1','bL2','bL3','bL4','bV2','bV3'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
+['tsz','ssz','dSz','vSz','btSz','biSz','bnSz','cdSz','bcSz','tW','tH','tS','stW'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value)||0;render();}));
+['fIOx','fIOy','bIOx','bIOy'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=parseInt(e.target.value)||0;render();}));
+['cBg','cAc','cTx','cSb'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
+['fnT','fnS'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
+document.getElementById('stOn').addEventListener('change',e=>{S.stOn=e.target.checked;render();});
+document.getElementById('bDen').addEventListener('input',e=>{S.bDen=parseInt(e.target.value);document.getElementById('dVal').textContent=S.bDen;render();});
+document.querySelectorAll('.sb2').forEach(b=>b.addEventListener('click',()=>{const m={tB:'tB',tI:'tI',tU:'tU',tS:'tS2',sB:'sB',sI:'sI',sU:'sU',sS:'sS'};const k=m[b.dataset.f]||b.dataset.f;S[k]=!S[k];b.classList.toggle('on',S[k]);render();}));
+['fIOp','bIOp'].forEach(id=>{document.getElementById(id).addEventListener('input',e=>{S[id]=parseInt(e.target.value);document.getElementById(id+'V').textContent=S[id]+'%';render();});});
+// fade
+document.getElementById('fFdOn').addEventListener('change',e=>{S.fFdOn=e.target.checked;document.getElementById('fFdOpts').style.display=S.fFdOn?'block':'none';render();});
+document.getElementById('bFdOn').addEventListener('change',e=>{S.bFdOn=e.target.checked;document.getElementById('bFdOpts').style.display=S.bFdOn?'block':'none';render();});
+document.getElementById('fFdR').addEventListener('input',e=>{S.fFdR=parseInt(e.target.value);document.getElementById('fFdRV').textContent=S.fFdR+'%';render();});
+document.getElementById('bFdR').addEventListener('input',e=>{S.bFdR=parseInt(e.target.value);document.getElementById('bFdRV').textContent=S.bFdR+'%';render();});
+document.getElementById('fFdCol').addEventListener('input',e=>{S.fFdCol=e.target.value;render();});
+document.getElementById('bFdCol').addEventListener('input',e=>{S.bFdCol=e.target.value;render();});
+document.getElementById('fFdTr').addEventListener('change',e=>{S.fFdTr=e.target.checked;render();});
+document.getElementById('bFdTr').addEventListener('change',e=>{S.bFdTr=e.target.checked;render();});
+['fIBd','bIBd','fIW','fIH','bIW','bIH'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=parseInt(e.target.value)||0;render();}));
+['fIBdC','bIBdC'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
+['fIBdSt','bIBdSt'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
+['fISz','bISz'].forEach(id=>{document.getElementById(id).addEventListener('input',e=>{S[id]=parseInt(e.target.value);document.getElementById(id+'V').textContent=S[id];render();});});
+['fIRd','bIRd'].forEach(id=>{document.getElementById(id).addEventListener('input',e=>{S[id]=parseInt(e.target.value);document.getElementById(id+'V').textContent=S[id];render();});});
+// decorations
+document.getElementById('decDots').addEventListener('change',e=>{S.decDots=e.target.checked;render();});
+document.getElementById('decBorder').addEventListener('change',e=>{S.decBorder=e.target.checked;render();});
+
+// editor mode (UI + bg separate)
+document.getElementById('sgMode').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  document.getElementById('sgMode').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  if(b.dataset.v==='dark')document.body.classList.add('dark');
+  else document.body.classList.remove('dark');
+}));
+document.getElementById('sgBg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  document.getElementById('sgBg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  const r=document.documentElement.style;
+  switch(b.dataset.v){
+    case'check-dark':r.setProperty('--ckA','#2a2a30');r.setProperty('--ckB','#222226');break;
+    case'white':r.setProperty('--ckA','#fff');r.setProperty('--ckB','#fff');break;
+    case'black':r.setProperty('--ckA','#111');r.setProperty('--ckB','#111');break;
+    default:r.setProperty('--ckA','#e8e4dc');r.setProperty('--ckB','#f2efea');break;
+  }
+}));
+
+// HTML code copy
+document.getElementById('cpH').addEventListener('click',()=>{
+  const html=mkH('front','back');
+  navigator.clipboard.writeText(html).then(()=>{
+    const b=document.getElementById('cpH');b.textContent='✅복사됨';setTimeout(()=>b.textContent='📋코드복사',1500);
+  });
+});
+
+// Blog copy: SVG → base64 data URI <img> (blogs strip <svg> tags but allow <img>)
+document.getElementById('cpBlog').addEventListener('click',async()=>{
+  const btn=document.getElementById('cpBlog');
+  btn.textContent='⏳변환중...';
+  try{
+    const fSvg=bSVG('front'),bSvg=bSVG('back');
+    const toB64=svg=>'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+    const{W,H}=dims();
+    const pad=['waveS','waveL','zigS','zigL','scallop','stamp'].includes(S.edge)?16:4;
+    const w=W+pad*2,h=H+pad*2;
+    const blogHtml=`<div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:16px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+<span style="font-size:11px;letter-spacing:1px;color:#888;">앞면</span>
+<img src="${toB64(fSvg)}" width="${w}" height="${h}" alt="티켓 앞면" style="max-width:100%;height:auto;">
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+<span style="font-size:11px;letter-spacing:1px;color:#888;">뒷면</span>
+<img src="${toB64(bSvg)}" width="${w}" height="${h}" alt="티켓 뒷면" style="max-width:100%;height:auto;">
+</div>
+</div>`;
+    await navigator.clipboard.writeText(blogHtml);
+    btn.textContent='✅복사됨';setTimeout(()=>btn.textContent='📝블로그용',1500);
+  }catch(e){btn.textContent='❌실패';setTimeout(()=>btn.textContent='📝블로그용',1500);}
+});
+
+// image upload
+function sI(fId,uId,tId,cId,dk,uk){const fi=document.getElementById(fId),ui=document.getElementById(uId),th=document.getElementById(tId),cl=document.getElementById(cId);function sh(s){th.src=s;th.style.display='block';cl.style.display='block';}fi.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S[dk]=ev.target.result;S[uk]='';ui.value='';sh(S[dk]);render();};r.readAsDataURL(f);});ui.addEventListener('input',e=>{S[uk]=e.target.value;S[dk]='';fi.value='';if(S[uk])sh(S[uk]);else{th.style.display='none';cl.style.display='none';}render();});cl.addEventListener('click',()=>{S[dk]='';S[uk]='';ui.value='';fi.value='';th.style.display='none';cl.style.display='none';render();});}
+sI('fIF','fIU','fITh','fICl','fID','fIU');sI('bIF','bIU','bITh','bICl','bID','bIU');
+
+// ════ GEOMETRY ════
+function dims(){return{W:Math.max(150,S.tW),H:Math.max(80,S.tH),stub:Math.max(40,Math.min(S.tS,Math.floor(S.tW*.4)))};}
+function pStr(W,H){return`M0,0H${W}V${H}H0Z`;}
+function pRnd(W,H,r){return`M${r},0H${W-r}Q${W},0,${W},${r}V${H-r}Q${W},${H},${W-r},${H}H${r}Q0,${H},0,${H-r}V${r}Q0,0,${r},0Z`;}
+function pChm(W,H,c){return`M${c},0H${W-c}L${W},${c}V${H-c}L${W-c},${H}H${c}L0,${H-c}V${c}Z`;}
+function pWv(W,H,o,n,a){if(o==='landscape'){const s=H/n;let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`C${W+a},${i*s},${W+a},${(i+1)*s},${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`C${-a},${i*s},${-a},${(i-1)*s},0,${(i-1)*s} `;return d+'Z';}else{const s=W/n;let d=`M0,0 `;for(let i=0;i<n;i++)d+=`C${i*s},${-a},${(i+1)*s},${-a},${(i+1)*s},0 `;d+=`V${H} `;for(let i=n;i>0;i--)d+=`C${i*s},${H+a},${(i-1)*s},${H+a},${(i-1)*s},${H} `;return d+'Z';}}
+function pZg(W,H,o,n,a){if(o==='landscape'){const s=H/n;let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`L${W-a},${i*s+s/2}L${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`L${a},${(i-1)*s+s/2}L0,${(i-1)*s} `;return d+'Z';}else{const s=W/n;let d=`M0,0 `;for(let i=0;i<n;i++)d+=`L${i*s+s/2},${-a}L${(i+1)*s},0 `;d+=`V${H} `;for(let i=n;i>0;i--)d+=`L${(i-1)*s+s/2},${H+a}L${(i-1)*s},${H} `;return d+'Z';}}
+function pSc(W,H,o,n,r,inw){const sw=inw?0:1,bw=inw?1:0;if(o==='landscape'){const s=H/n;let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`A${r},${r},0,0,${sw},${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`A${r},${r},0,0,${bw},0,${(i-1)*s} `;return d+'Z';}else{const s=W/n;let d=`M0,0 `;for(let i=0;i<n;i++)d+=`A${r},${r},0,0,${sw},${(i+1)*s},0 `;d+=`V${H} `;for(let i=n;i>0;i--)d+=`A${r},${r},0,0,${bw},${(i-1)*s},${H} `;return d+'H0Z';}}
+function getP(W,H){const o=S.orient;switch(S.edge){case'round':return pRnd(W,H,14);case'roundXL':return pRnd(W,H,32);case'chamfer':return pChm(W,H,18);case'waveS':return pWv(W,H,o,o==='landscape'?10:16,5);case'waveL':return pWv(W,H,o,o==='landscape'?5:8,12);case'zigS':return pZg(W,H,o,o==='landscape'?12:20,6);case'zigL':return pZg(W,H,o,o==='landscape'?7:12,12);case'scallop':return pSc(W,H,o,o==='landscape'?8:14,8,true);case'stamp':return pSc(W,H,o,o==='landscape'?8:14,8,false);default:return pStr(W,H);}}
+function prf(W,H,st,o){let s=[];if(o==='landscape'){const px=W-st;for(let y=0;y<=H;y+=9)s.push(`M${px},${y}L${px},${Math.min(y+5,H)}`);}else{const py=H-st;for(let x=0;x<=W;x+=9)s.push(`M${x},${py}L${Math.min(x+5,W)},${py}`);}return s.join(' ');}
+function bc(x,y,w,h,col,hz){if(S.bcSt==='none')return'';const n=S.bDen||20,sd=S.bCd,bars=[];for(let i=0;i<n;i++)bars.push((sd.charCodeAt(i%sd.length)%3)+1);const tot=bars.reduce((a,b)=>a+b,0);let out='';if(!hz){let cx=x,u=w/tot;bars.forEach((bw,i)=>{if(i%2===0)out+=`<rect x="${cx.toFixed(1)}" y="${y}" width="${Math.max(.5,(bw*u-.4)).toFixed(1)}" height="${h}" fill="${col}" opacity=".85"/>`;cx+=bw*u;});}else{let cy=y,u=h/tot;bars.forEach((bw,i)=>{if(i%2===0)out+=`<rect x="${x}" y="${cy.toFixed(1)}" width="${w}" height="${Math.max(.5,(bw*u-.4)).toFixed(1)}" fill="${col}" opacity=".85"/>`;cy+=bw*u;});}return out;}
+function dots(x,y,w,col){if(!S.decDots)return'';let o='';for(let i=x;i<x+w;i+=8)o+=`<circle cx="${i}" cy="${y}" r="1" fill="${col}" opacity=".4"/>`;return o;}
+function td(cx,cy,w,col,u,s,fs){let o='';if(u)o+=`<line x1="${cx-w/2}" y1="${cy+2}" x2="${cx+w/2}" y2="${cy+2}" stroke="${col}" stroke-width="1"/>`;if(s)o+=`<line x1="${cx-w/2}" y1="${cy-fs*.3}" x2="${cx+w/2}" y2="${cy-fs*.3}" stroke="${col}" stroke-width="1"/>`;return o;}
+let cn=0;
+function iB(src,x,y,w,h,rx,op){if(!src)return'';const id='c'+(++cn);return`<clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></clipPath><image href="${esc(src)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})" opacity="${op}"/>`;}
+
+// ── STRIP (multi-select, full ticket) ──
+function strip(W,H){
+  if(!S.stOn||!S.stPos.length)return'';const sw=S.stW,ac=S.cAc;let o='';
+  if(S.stPos.includes('left'))o+=`<rect x="0" y="0" width="${sw}" height="${H}" fill="${ac}" opacity=".75"/>`;
+  if(S.stPos.includes('right'))o+=`<rect x="${W-sw}" y="0" width="${sw}" height="${H}" fill="${ac}" opacity=".75"/>`;
+  if(S.stPos.includes('top'))o+=`<rect x="0" y="0" width="${W}" height="${sw}" fill="${ac}" opacity=".75"/>`;
+  if(S.stPos.includes('bottom'))o+=`<rect x="0" y="${H-sw}" width="${W}" height="${sw}" fill="${ac}" opacity=".75"/>`;
+  return o;
+}
+
+// ── IMAGE EDGE FADE + SHAPE ──
+function edgeFade(src,x,y,w,h,op,fdOn,fdDir,fdR,fdCol,fdTr,rd,bdW,bdC,bdSt){
+  if(!src)return'';
+  const maskId='fm'+(++cn);const pct=fdR/100;
+  const dirs={right:['1','0','0','0'],left:['0','0','1','0'],down:['0','1','0','0'],up:['0','0','0','1']};
+  const[gx1,gy1,gx2,gy2]=dirs[fdDir]||dirs.right;
+  let o='';
+  // fade mask
+  if(fdOn){
+    o+=`<mask id="${maskId}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="white"/>
+    <linearGradient id="fmg${cn}" x1="${gx1}" y1="${gy1}" x2="${gx2}" y2="${gy2}">
+    <stop offset="0%" stop-color="white"/><stop offset="${(1-pct)*100}%" stop-color="white"/><stop offset="100%" stop-color="black"/>
+    </linearGradient>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#fmg${cn})"/></mask>`;
+  }
+  // clip with rounding
+  const cid='fc'+(++cn);
+  const rx=Math.min(rd,w/2,h/2);
+  o+=`<clipPath id="${cid}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></clipPath>`;
+  o+=`<image href="${esc(src)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${cid})" opacity="${op}" ${fdOn?`mask="url(#${maskId})"`:''} />`;
+  // border
+  if(bdW>0){
+    let dash='';
+    if(bdSt==='dashed')dash='stroke-dasharray="8,4"';
+    else if(bdSt==='dotted')dash='stroke-dasharray="2,3"';
+    else if(bdSt==='double'){
+      o+=`<rect x="${x+1}" y="${y+1}" width="${w-2}" height="${h-2}" rx="${rx}" fill="none" stroke="${bdC}" stroke-width="${Math.max(1,bdW/3)}"/>`;
+      o+=`<rect x="${x+bdW-1}" y="${y+bdW-1}" width="${w-bdW*2+2}" height="${h-bdW*2+2}" rx="${Math.max(0,rx-bdW+1)}" fill="none" stroke="${bdC}" stroke-width="${Math.max(1,bdW/3)}"/>`;
+      dash='__skip__';
+    }
+    else if(bdSt==='double-thick'){
+      o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="none" stroke="${bdC}" stroke-width="${Math.max(1,bdW*.6)}"/>`;
+      o+=`<rect x="${x+bdW}" y="${y+bdW}" width="${w-bdW*2}" height="${h-bdW*2}" rx="${Math.max(0,rx-bdW)}" fill="none" stroke="${bdC}" stroke-width="${Math.max(1,bdW*.25)}"/>`;
+      dash='__skip__';
+    }
+    if(dash!=='__skip__')o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="none" stroke="${bdC}" stroke-width="${bdW}" ${dash}/>`;
+  }
+  // fade color fill (or transparent = just mask, no fill)
+  if(fdOn&&!fdTr&&fdCol){
+    const gid='fcg'+(++cn);
+    o+=`<linearGradient id="${gid}" x1="${gx1}" y1="${gy1}" x2="${gx2}" y2="${gy2}"><stop offset="${(1-pct)*100}%" stop-color="${fdCol}" stop-opacity="0"/><stop offset="100%" stop-color="${fdCol}" stop-opacity="1"/></linearGradient>`;
+    const cid2='fc2'+(++cn);
+    o+=`<clipPath id="${cid2}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></clipPath>`;
+    o+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${gid})" clip-path="url(#${cid2})"/>`;
+  }
+  return o;
+}
+
+// ── image render ──
+function iR(src,pos,mW,mH,op,ox,oy,fdOn,fdDir,fdR,fdCol,fdTr,sz,iW,iH,rd,bdW,bdC,bdSt){
+  if(!src||pos==='none')return'';
+  const a=op/100;const sc=sz/100;
+  // compute actual image dimensions
+  function imgDims(defW,defH){
+    let w=iW>0?iW:defW, h=iH>0?iH:defH;
+    w=Math.round(w*sc); h=Math.round(h*sc);
+    return{w,h};
+  }
+  if(pos==='custom'){const{w,h}=imgDims(mW,mH);return edgeFade(src,ox,oy,w,h,a,fdOn,fdDir,fdR,fdCol,fdTr,rd,bdW,bdC,bdSt);}
+  if(pos==='bg')return edgeFade(src,ox,oy,mW,mH,a*.3,fdOn,fdDir,fdR,fdCol,fdTr,0,0,'','solid');
+  if(pos==='full'){let o=edgeFade(src,ox,oy,mW,mH,a,fdOn,fdDir,fdR,fdCol,fdTr,0,0,'','solid');o+=`<rect x="0" y="0" width="${mW}" height="${mH}" fill="${S.cBg}" opacity=".5"/>`;return o;}
+  if(pos==='left'){const{w,h}=imgDims(Math.floor(mH*.75),mH-14);return edgeFade(src,8+ox,7+oy,w,h,a,fdOn||true,fdOn?fdDir:'right',fdOn?fdR:35,fdCol||S.cBg,fdTr,rd,bdW,bdC,bdSt);}
+  if(pos==='right'){const{w,h}=imgDims(Math.floor(mH*.7),mH-14);return edgeFade(src,mW-w-8+ox,7+oy,w,h,a,fdOn||true,fdOn?fdDir:'left',fdOn?fdR:35,fdCol||S.cBg,fdTr,rd,bdW,bdC,bdSt);}
+  if(pos==='top'){const{w,h}=imgDims(mW,Math.floor(mH*.44));return edgeFade(src,ox,oy,w,h,a,true,'down',fdOn?fdR:40,fdCol||S.cBg,fdTr,0,0,'','solid');}
+  if(pos==='bottom'){const{w,h}=imgDims(mW,Math.floor(mH*.38));const iy=mH-h;return edgeFade(src,ox,iy+oy,w,h,a,true,'up',fdOn?fdR:40,fdCol||S.cBg,fdTr,0,0,'','solid');}
+  if(pos==='center'){const{w,h}=imgDims(Math.min(mW,mH)*.5,Math.min(mW,mH)*.5);const r=Math.min(w,h)/2;const cx=mW/2+ox,cy=mH/2+oy;const id='cc'+(++cn);let o=`<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${r}"/></clipPath><image href="${esc(src)}" x="${cx-r}" y="${cy-r}" width="${r*2}" height="${r*2}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})" opacity="${a}"/>`;if(bdW>0)o+=`<circle cx="${cx}" cy="${cy}" r="${r-bdW/2}" fill="none" stroke="${bdC}" stroke-width="${bdW}"/>`;return o;}
+  if(pos==='corner'){const{w,h}=imgDims(Math.min(mW,mH)*.36,Math.min(mW,mH)*.36);return edgeFade(src,mW-w-6+ox,mH-h-6+oy,w,h,a,fdOn,fdDir,fdR,fdCol,fdTr,rd,bdW,bdC,bdSt);}
+  return'';
+}
+
+// ═══ RENDER FRONT ═══
+function rF(W,H,st,o,th){cn=10;const ac=S.cAc,tx=S.cTx,sb=S.cSb;const mW=o==='landscape'?W-st:W,mH=o==='landscape'?H:H-st;const img=S.fID||S.fIU||'';const tF=S.fnT||th.f1,sF=S.fnS||th.f2;const tw=S.tB?'700':(tF.includes('Bebas')?'400':'700');const ti=S.tI?'italic':'normal';const sw2=S.sB?'700':'400';const si=S.sI?'italic':'normal';let ts=S.tsz>0?S.tsz:Math.min(60,Math.max(14,o==='landscape'?(mW-100)/Math.max(S.fT.length,3)*1.5:(mW-20)/Math.max(S.fT.length,3)*2.2));const ss=S.ssz||11;let out='';
+out+=iR(img,S.fIP,mW,mH,S.fIOp,S.fIOx,S.fIOy,S.fFdOn,S.fFdDir,S.fFdR,S.fFdCol||S.cBg,S.fFdTr,S.fISz,S.fIW,S.fIH,S.fIRd,S.fIBd,S.fIBdC,S.fIBdSt);
+const rx={'round':'5','roundXL':'20'}[S.edge]||'0';if(S.decBorder)out+=`<rect x="9" y="9" width="${mW-18}" height="${mH-18}" fill="none" stroke="${ac}" stroke-width=".6" opacity=".3" rx="${rx}"/>`;
+let cX=mW/2,mg=16;if(img&&S.fIP==='left'){const off=Math.floor(mH*.75)+16;cX=off+(mW-off)/2;mg=off;}if(img&&S.fIP==='right')cX=(mW-Math.floor(mH*.7)-8)/2;
+if(o==='landscape'){out+=dots(mg,18,mW-mg-45,tx);out+=dots(mg,mH-18,mW-mg-45,tx);out+=`<text x="${cX}" y="${mH/2-ss/2-8}" text-anchor="middle" font-family="${esc(tF)}" font-size="${ts}" font-weight="${tw}" font-style="${ti}" fill="${tx}" dominant-baseline="middle">${esc(S.fT)}</text>`;out+=td(cX,mH/2-ss/2-8,ts*S.fT.length*.6,tx,S.tU,S.tS2,ts);out+=`<text x="${cX}" y="${mH/2+ts*.55+4}" text-anchor="middle" font-family="${esc(sF)}" font-size="${ss}" font-weight="${sw2}" font-style="${si}" fill="${sb}" letter-spacing="1.5" dominant-baseline="middle">${esc(S.fSb)}</text>`;out+=td(cX,mH/2+ts*.55+4,ss*S.fSb.length*.55,sb,S.sU,S.sS,ss);out+=`<text x="${mg}" y="${mH-26}" font-family="${esc(th.f2)}" font-size="${S.dSz}" fill="${sb}" letter-spacing="1">${esc(S.fDt)}</text>`;out+=`<text x="${mg}" y="${mH-10}" font-family="${esc(th.f2)}" font-size="${S.vSz}" fill="${tx}" font-weight="500">${esc(S.fVn)}</text>`;const sx=mW+8,sw3=st-16;out+=bc(sx+4,12,sw3-8,mH-38,tx,true);out+=`<text x="${sx+sw3/2}" y="${mH-10}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.bcSz}" fill="${sb}">${esc(S.bcTx)}</text>`;out+=`<text x="${sx+sw3/2}" y="${mH-24}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${rgba(sb,.7)}">${esc(S.bCd)}</text>`;}
+else{let ct=(img&&S.fIP==='top')?Math.floor(mH*.44)+6:12;out+=dots(16,ct+10,W-32,tx);const ty=ct+38;out+=`<text x="${W/2}" y="${ty}" text-anchor="middle" font-family="${esc(tF)}" font-size="${ts}" font-weight="${tw}" font-style="${ti}" fill="${tx}" dominant-baseline="middle">${esc(S.fT)}</text>`;out+=td(W/2,ty,ts*S.fT.length*.6,tx,S.tU,S.tS2,ts);out+=`<text x="${W/2}" y="${ty+ts*.65+10}" text-anchor="middle" font-family="${esc(sF)}" font-size="${ss}" font-weight="${sw2}" font-style="${si}" fill="${sb}" letter-spacing="1.5">${esc(S.fSb)}</text>`;out+=td(W/2,ty+ts*.65+10,ss*S.fSb.length*.55,sb,S.sU,S.sS,ss);out+=`<text x="${W/2}" y="${mH-32}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.dSz}" fill="${sb}">${esc(S.fDt)}</text>`;out+=`<text x="${W/2}" y="${mH-16}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.vSz}" fill="${tx}">${esc(S.fVn)}</text>`;out+=dots(16,mH-4,W-32,tx);out+=bc(12,mH+6,W-24,st-22,tx,false);out+=`<text x="${W/2}" y="${mH+st-8}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.bcSz}" fill="${sb}">${esc(S.bcTx)} · ${esc(S.bCd)}</text>`;}
+return out;}
+
+// ═══ RENDER BACK ═══
+function rB(W,H,st,o,th){cn=200;const ac=S.cAc,tx=S.cTx,sb=S.cSb;const mW=o==='landscape'?W-st:W,mH=o==='landscape'?H:H-st;const img=S.bID||S.bIU||'';const rows=[[S.bL1,S.bSt],[S.bL2,S.bV2||S.fDt],[S.bL3,S.bV3||S.fVn],[S.bL4,S.bPr]].filter(([l,v])=>l||v);const notes=S.bNt.split('\n').filter(Boolean);let out='';
+out+=iR(img,S.bIP,mW,mH,S.bIOp,S.bIOx,S.bIOy,S.bFdOn,S.bFdDir,S.bFdR,S.bFdCol||S.cBg,S.bFdTr,S.bISz,S.bIW,S.bIH,S.bIRd,S.bIBd,S.bIBdC,S.bIBdSt);
+const rx={'round':'5','roundXL':'20'}[S.edge]||'0';if(S.decBorder)out+=`<rect x="9" y="9" width="${mW-18}" height="${mH-18}" fill="none" stroke="${ac}" stroke-width=".6" opacity=".25" rx="${rx}"/>`;
+const tpl=S.bkTpl;let tE=mW;if(img&&S.bIP==='right')tE=mW-Math.floor(mH*.7)-16;
+if(o==='landscape'){
+  if(tpl==='default'){out+=`<text x="16" y="26" font-family="${esc(th.f1)}" font-size="${S.btSz}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<line x1="16" y1="34" x2="${tE-8}" y2="34" stroke="${ac}" stroke-width=".6" opacity=".35"/>`;rows.forEach(([l,v],i)=>{const ry=52+i*24;out+=`<text x="16" y="${ry}" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">${esc(l)}</text><text x="56" y="${ry}" font-family="${esc(th.f2)}" font-size="${S.biSz}" fill="${tx}" font-weight="500">${esc(v.slice(0,30))}</text>`;});let ny=52;notes.forEach((n,i)=>out+=`<text x="${tE-10}" y="${ny+i*15}" text-anchor="end" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">• ${esc(n)}</text>`);out+=`<text x="16" y="${mH-10}" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${rgba(sb,.6)}"># ${esc(S.bCd)}</text>`;}
+  else if(tpl==='split'){const half=Math.floor((tE-16)/2);out+=`<text x="16" y="26" font-family="${esc(th.f1)}" font-size="${S.btSz}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<line x1="16" y1="34" x2="${tE-8}" y2="34" stroke="${ac}" stroke-width=".6" opacity=".35"/>`;rows.forEach(([l,v],i)=>{const ry=52+i*22;out+=`<text x="16" y="${ry}" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">${esc(l)}</text><text x="16" y="${ry+12}" font-family="${esc(th.f2)}" font-size="${S.biSz}" fill="${tx}" font-weight="500">${esc(v.slice(0,20))}</text>`;});out+=`<line x1="${16+half}" y1="38" x2="${16+half}" y2="${mH-14}" stroke="${ac}" stroke-width=".4" opacity=".2"/>`;const rx2=16+half+10;notes.forEach((n,i)=>out+=`<text x="${rx2}" y="${52+i*14}" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">• ${esc(n)}</text>`);out+=`<text x="${rx2}" y="${mH-10}" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${rgba(sb,.6)}"># ${esc(S.bCd)}</text>`;}
+  else if(tpl==='card'){out+=`<text x="${mW/2}" y="28" text-anchor="middle" font-family="${esc(th.f1)}" font-size="${S.btSz}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<line x1="20" y1="36" x2="${mW-20}" y2="36" stroke="${ac}" stroke-width=".6" opacity=".35"/>`;rows.forEach(([l,v],i)=>{out+=`<text x="${mW/2}" y="${54+i*22}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz}" fill="${tx}" font-weight="500">${esc(l)}: ${esc(v)}</text>`;});let ny=54+rows.length*22+4;notes.forEach((n,i)=>out+=`<text x="${mW/2}" y="${ny+i*13}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">${esc(n)}</text>`);out+=`<text x="${mW/2}" y="${mH-10}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${rgba(sb,.6)}"># ${esc(S.bCd)}</text>`;}
+  else{out+=`<text x="${mW/2}" y="${mH*.35}" text-anchor="middle" font-family="${esc(th.f1)}" font-size="${S.btSz*1.1}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<text x="${mW/2}" y="${mH*.55}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz+2}" fill="${tx}" font-weight="500">${esc(S.bSt)}</text>`;out+=`<text x="${mW/2}" y="${mH*.7}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz+2}" fill="${ac}" font-weight="700">${esc(S.bPr)}</text>`;out+=`<text x="${mW/2}" y="${mH-10}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${rgba(sb,.5)}">${esc(S.bCd)}</text>`;}
+  const sx=mW+8,sw3=st-16;out+=bc(sx+4,12,sw3-8,mH-38,tx,true);out+=`<text x="${sx+sw3/2}" y="${mH-10}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.bcSz}" fill="${sb}">${esc(S.bcTx)}</text>`;
+}else{
+  // portrait back
+  if(tpl==='simple'){out+=`<text x="${W/2}" y="${mH*.3}" text-anchor="middle" font-family="${esc(th.f1)}" font-size="${S.btSz}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<text x="${W/2}" y="${mH*.48}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz+1}" fill="${tx}">${esc(S.bSt)}</text>`;out+=`<text x="${W/2}" y="${mH*.62}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz+1}" fill="${ac}" font-weight="700">${esc(S.bPr)}</text>`;}
+  else if(tpl==='card'){out+=`<text x="${W/2}" y="24" text-anchor="middle" font-family="${esc(th.f1)}" font-size="${S.btSz-2}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<line x1="14" y1="32" x2="${W-14}" y2="32" stroke="${ac}" stroke-width=".6" opacity=".35"/>`;rows.forEach(([l,v],i)=>out+=`<text x="${W/2}" y="${48+i*26}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.biSz}" fill="${tx}">${esc(l)}: ${esc(v)}</text>`);}
+  else{out+=`<text x="${W/2}" y="24" text-anchor="middle" font-family="${esc(th.f1)}" font-size="${S.btSz-2}" fill="${tx}">${esc(S.bTt)}</text>`;out+=`<line x1="14" y1="32" x2="${W-14}" y2="32" stroke="${ac}" stroke-width=".6" opacity=".35"/>`;rows.forEach(([l,v],i)=>{const ry=48+i*28;out+=`<text x="14" y="${ry}" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">${esc(l)}</text><text x="14" y="${ry+13}" font-family="${esc(th.f2)}" font-size="${S.biSz}" fill="${tx}" font-weight="500">${esc(v.slice(0,24))}</text>`;});const ce=mH-(img&&S.bIP==='bottom'?Math.floor(mH*.38)+4:0);const ny3=ce-28-notes.length*14;notes.forEach((n,i)=>out+=`<text x="14" y="${ny3+i*14}" font-family="${esc(th.f2)}" font-size="${S.bnSz}" fill="${sb}">• ${esc(n)}</text>`);}
+  out+=dots(14,mH-6,W-28,tx);out+=bc(12,mH+6,W-24,st-22,tx,false);out+=`<text x="${W/2}" y="${mH+st-8}" text-anchor="middle" font-family="${esc(th.f2)}" font-size="${S.cdSz}" fill="${sb}"># ${esc(S.bCd)}</text>`;
+}return out;}
+
+// ═══ BUILD & RENDER ═══
+function bSVG(side){const{W,H,stub}=dims();const th=gt();const pad=['waveS','waveL','zigS','zigL','scallop','stamp'].includes(S.edge)?16:4;const mp=getP(W,H),pf=prf(W,H,stub,S.orient);const cnt=side==='front'?rF(W,H,stub,S.orient,th):rB(W,H,stub,S.orient,th);const st=strip(W,H);
+return`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W+pad*2}" height="${H+pad*2}" viewBox="${-pad} ${-pad} ${W+pad*2} ${H+pad*2}"><defs><clipPath id="tc"><path d="${mp}"/></clipPath><filter id="sh" x="-8%" y="-8%" width="130%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#000" flood-opacity=".14"/></filter></defs><g filter="url(#sh)"><path d="${mp}" fill="${S.cBg}"/></g><g clip-path="url(#tc)"><path d="${mp}" fill="${S.cBg}"/>${cnt}<path d="${pf}" stroke="${rgba(S.cTx,.22)}" stroke-width="1.2" fill="none"/>${st}</g></svg>`;}
+function render(){const svg=bSVG(S.side),el=document.getElementById('tSvg');const nw=new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;el.replaceWith(nw);nw.id='tSvg';}
+
+// ═══ DOWNLOADS ═══
+const FL=`<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet"><style>@font-face{font-family:'Ridibatang';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff') format('woff');}@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFLightA.woff') format('woff');font-weight:300;}@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');font-weight:700;}@font-face{font-family:'OngleipParkDahyeon';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');}</style>`;
+function mkH(...sides){const p=sides.map(s=>`<div class="b"><div class="l">${s==='front'?'앞면':'뒷면'}</div>${bSVG(s)}</div>`).join('');return`<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>티켓</title>${FL}<style>body{margin:0;padding:2rem;background:#eae6de;font-family:'Noto Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;gap:2rem;}.p{display:flex;gap:2.5rem;flex-wrap:wrap;justify-content:center;}.b{display:flex;flex-direction:column;align-items:center;gap:.5rem;}.l{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#888;}@media print{body{background:white;padding:.5rem;}}</style></head><body><div class="p">${p}</div></body></html>`;}
+function dl(n,b){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();}
+document.getElementById('dHA').addEventListener('click',()=>dl(`ticket.html`,new Blob([mkH('front','back')],{type:'text/html;charset=utf-8'})));
+document.getElementById('dHF').addEventListener('click',()=>dl(`ticket-front.html`,new Blob([mkH('front')],{type:'text/html;charset=utf-8'})));
+document.getElementById('dHB').addEventListener('click',()=>dl(`ticket-back.html`,new Blob([mkH('back')],{type:'text/html;charset=utf-8'})));
+document.getElementById('dSV').addEventListener('click',()=>dl(`ticket.svg`,new Blob([bSVG(S.side)],{type:'image/svg+xml;charset=utf-8'})));
+function dP(side){const svg=bSVG(side),{W,H}=dims();const pad=['waveS','waveL','zigS','zigL','scallop','stamp'].includes(S.edge)?16:4;const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),url=URL.createObjectURL(blob);const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=(W+pad*2)*3;c.height=(H+pad*2)*3;const ctx=c.getContext('2d');ctx.scale(3,3);ctx.drawImage(img,0,0);URL.revokeObjectURL(url);c.toBlob(b=>dl(`ticket-${side}.png`,b),'image/png');};img.src=url;}
+document.getElementById('dPF').addEventListener('click',()=>dP('front'));
+document.getElementById('dPB').addEventListener('click',()=>dP('back'));
+render();
+</script>
+</body>
+</html>
