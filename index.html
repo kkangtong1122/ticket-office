@@ -23,7 +23,7 @@ body.dark .sg button,body.dark .ec,body.dark .ip,body.dark .btc,body.dark .fd bu
 .app{display:flex;height:100vh;}
 .panel{width:330px;flex-shrink:0;background:var(--pn);border-right:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden;}
 .preview{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-@media(max-width:700px){.app{flex-direction:column;height:auto;min-height:100vh;}.preview{flex:none;height:45vh;min-height:200px;order:-1;}.panel{width:100%;flex:1;border-right:none;border-top:1px solid var(--bd);}}
+@media(max-width:700px){.app{flex-direction:column;height:auto;min-height:100vh;}.preview{flex:none;height:52vh;min-height:240px;order:-1;}.panel{width:100%;flex:1;border-right:none;border-top:1px solid var(--bd);}.pc{padding:.5rem;}}
 .tb{display:flex;border-bottom:1px solid var(--bd);background:#f8f6f2;flex-shrink:0;}
 .tb button{flex:1;padding:.45rem 0;font-family:var(--ui);font-size:.66rem;font-weight:500;border:none;background:none;color:var(--mt);cursor:pointer;border-bottom:2px solid transparent;transition:.12s;}
 .tb button.on{color:var(--ac);border-bottom-color:var(--ac);}
@@ -75,7 +75,9 @@ input[type=color]{width:24px;height:20px;border:1px solid var(--bd);border-radiu
 .pa{display:flex;gap:2px;flex-wrap:wrap;}
 .pb{font-family:var(--ui);font-size:.58rem;font-weight:500;padding:.18rem .35rem;border:1px solid var(--bd);border-radius:4px;background:var(--pn);color:var(--mt);cursor:pointer;transition:.1s;}
 .pb:hover{background:var(--tx);color:#fff;border-color:var(--tx);}.pb.pr{background:var(--tx);color:#fff;border-color:var(--tx);}
-.pc{flex:1;display:flex;align-items:center;justify-content:center;padding:1rem;overflow:auto;background:repeating-conic-gradient(var(--ckA) 0% 25%,var(--ckB) 0% 50%) 0 0/16px 16px;}
+.pc{flex:1;display:block;padding:1rem;overflow:auto;background:repeating-conic-gradient(var(--ckA) 0% 25%,var(--ckB) 0% 50%) 0 0/16px 16px;-webkit-overflow-scrolling:touch;}
+.pc-inner{min-width:100%;min-height:100%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.pc-inner>*{margin:auto;flex:none;}
 .fd{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;}.fd button{font-family:var(--ui);font-size:.66rem;padding:.2rem;border:1px solid var(--bd);border-radius:3px;background:#faf9f7;color:var(--mt);cursor:pointer;}.fd button.on{background:var(--ac);border-color:var(--ac);color:#fff;}
 
 /* ── TICKET (div-based) ── */
@@ -84,6 +86,14 @@ input[type=color]{width:24px;height:20px;border:1px solid var(--bd);border-radiu
 .ticket-stub{position:relative;overflow:hidden;}
 .ticket-perf{position:absolute;z-index:5;}
 .ticket-strip{position:absolute;z-index:3;pointer-events:none;}
+/* ── 슬라이더+숫자 결합 조정 UI ── */
+.adj{display:flex;align-items:center;gap:5px;margin:3px 0;}
+.adj>.lab{font-size:.62rem;color:var(--mt);width:42px;flex-shrink:0;}
+.adj>input[type=range]{flex:1;height:14px;min-width:0;}
+.adj>input[type=number]{width:46px;flex-shrink:0;font-size:.66rem;padding:.15rem .1rem;text-align:center;}
+.adjg{border:1px solid var(--bd);border-radius:5px;padding:5px 6px;margin-top:3px;}
+.adjg>.gt{font-size:.6rem;font-weight:700;color:var(--ac);margin-bottom:2px;}
+body.dark .adj>input[type=number]{background:#2a2a30;color:#e0e0e4;}
 </style>
 </head>
 <body>
@@ -96,106 +106,141 @@ input[type=color]{width:24px;height:20px;border:1px solid var(--bd);border-radiu
 </div>
 <div class="tp">
 
+<!-- ═══ 디자인 탭 ═══ -->
 <div class="pg on" data-t="design">
 <div><div class="sc">테마</div><div class="tg" id="tGrid"></div></div>
-<div><div class="sc">텍스트 정렬</div>
-<div class="sg" id="sgAlign">
-  <button data-v="left">왼쪽</button>
-  <button class="on" data-v="center">가운데</button>
-  <button data-v="right">오른쪽</button>
-</div></div>
-
 <div><div class="sc">방향</div><div class="sg" id="sgO"><button class="on" data-v="landscape">가로형</button><button data-v="portrait">세로형</button></div></div>
 <div><div class="sc">모서리</div><div class="eg" id="eGrid"></div></div>
 <div><div class="sc">크기 (px)</div>
 <div class="rw"><div class="f"><label>너비</label><input type="number" id="tW" value="500" min="200" max="900" step="10"></div><div class="f"><label>높이</label><input type="number" id="tH" value="210" min="100" max="600" step="10"></div><div class="f"><label>절취</label><input type="number" id="tS" value="130" min="40" max="250" step="5"></div></div></div>
 <hr class="dv">
-<div><div class="sc">색상</div>
+<details open><summary class="sc" style="cursor:pointer;">색상</summary>
 <div class="cr"><span>배경</span><input type="color" id="cBg" value="#f5f0e0"></div>
 <div class="cr"><span>강조</span><input type="color" id="cAc" value="#c8410a"></div>
-<div class="cr"><span>텍스트</span><input type="color" id="cTx" value="#2a1f10"></div>
-<div class="cr"><span>서브</span><input type="color" id="cSb" value="#8a6a40"></div>
+<div class="cr"><span>제목</span><input type="color" id="cTitle" value="#2a1f10"></div>
+<div class="cr"><span>부제목</span><input type="color" id="cSub" value="#8a6a40"></div>
+<div class="cr"><span>본문·정보</span><input type="color" id="cBody" value="#8a6a40"></div>
 <div style="margin-top:3px;">
 <label class="tog"><input type="checkbox" id="bgGrad"><span class="t"></span>배경 그라데이션</label>
 <div id="bgGradOpts" style="display:none;margin-top:3px;">
 <div class="cr"><span>끝색상</span><input type="color" id="bgGrad2" value="#d4a830"></div>
 <div class="sg" id="sgBgGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button><button data-v="45deg">↗</button></div>
 </div></div>
-</div>
+<div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="bkOverride"><span class="t"></span>뒷면 색상·폰트 따로</label>
+<div id="bkOverrideOpts" style="display:none;margin-top:4px;">
+<div class="cr"><span>뒷제목</span><input type="color" id="bcTitle" value="#2a1f10"></div>
+<div class="cr"><span>뒷부제</span><input type="color" id="bcSub" value="#8a6a40"></div>
+<div class="cr"><span>뒷본문</span><input type="color" id="bcBody" value="#8a6a40"></div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label style="font-size:.58rem;">뒷제목폰트</label><select id="bFnTitle"></select></div></div>
+<div class="rw" style="margin-top:2px;"><div class="f"><label style="font-size:.58rem;">뒷부제폰트</label><select id="bFnSub"></select></div></div>
+<div class="rw" style="margin-top:2px;"><div class="f"><label style="font-size:.58rem;">뒷본문폰트</label><select id="bFnBody"></select></div></div>
+</div></div>
+</details>
 <hr class="dv">
-<div><div class="sc">강조 띠 (복수 선택)</div>
+<details><summary class="sc" style="cursor:pointer;">바코드 · 절취구역</summary>
+<div class="sg" id="sgBC"><button class="on" data-v="barcode">바코드</button><button data-v="none">없음</button></div>
+<div id="bdRow" style="margin-top:3px;"><label style="font-size:.64rem;color:var(--mt);">밀도 <span id="dVal">20</span></label><input type="range" id="bDen" min="8" max="60" step="2" value="20"></div>
+<div class="fr" style="margin-top:4px;"><div class="f"><label>티켓번호</label><input type="text" id="bCd" placeholder="TK-0000-00000"></div><div class="sz"><input type="number" id="cdSz" value="7" min="4" max="16" step=".5"></div></div>
+<div class="fr" style="margin-top:2px;"><div class="f"><label>바코드텍스트</label><input type="text" id="bcTx" placeholder="ADMIT ONE"></div><div class="sz"><input type="number" id="bcSz" value="7.5" min="4" max="16" step=".5"></div></div>
+<div style="margin-top:3px;display:flex;gap:8px;">
+<label class="tog"><input type="checkbox" id="showBcTx" checked><span class="t"></span>텍스트 표시</label>
+<label class="tog"><input type="checkbox" id="showBcCd" checked><span class="t"></span>번호 표시</label>
+</div>
+<div style="margin-top:3px;"><label style="font-size:.62rem;color:var(--mt);">배치</label>
+<div class="sg" id="sgStubLayout"><button data-v="two" class="on">두 줄</button><button data-v="one">한 줄</button></div></div>
+</details>
+<hr class="dv">
+<details><summary class="sc" style="cursor:pointer;">강조 띠</summary>
 <label class="tog"><input type="checkbox" id="stOn" checked><span class="t"></span>띠 표시</label>
 <div class="sg ms" id="sgSP" style="margin-top:3px;"><button class="on" data-v="left">좌</button><button data-v="right">우</button><button data-v="top">상</button><button data-v="bottom">하</button></div>
-<div class="rw" style="margin-top:3px;"><div class="f"><label>두께</label><input type="number" id="stW" value="6" min="1" max="30"></div></div></div>
+<div class="rw" style="margin-top:3px;"><div class="f"><label>두께</label><input type="number" id="stW" value="6" min="1" max="30"></div></div>
+</details>
 <hr class="dv">
-<div><div class="sc">바코드</div>
-<div class="sg" id="sgBC"><button class="on" data-v="barcode">바코드</button><button data-v="none">없음</button></div>
-<div id="bdRow" style="margin-top:3px;"><label style="font-size:.64rem;color:var(--mt);">밀도 <span id="dVal">20</span></label><input type="range" id="bDen" min="8" max="60" step="2" value="20"></div></div>
-<hr class="dv">
-<div><div class="sc">장식</div>
+<details><summary class="sc" style="cursor:pointer;">장식</summary>
 <label class="tog"><input type="checkbox" id="decDots" checked><span class="t"></span>도트라인</label>
-<label class="tog" style="margin-top:2px;"><input type="checkbox" id="decBorder" checked><span class="t"></span>내부 테두리</label></div>
-<hr class="dv">
-<div><div class="sc">작업 환경</div>
-<div style="margin-bottom:2px;"><label style="font-size:.62rem;color:var(--mt);">UI</label>
-<div class="sg" id="sgMode"><button class="on" data-v="light">☀️밝게</button><button data-v="dark">🌙어둡게</button></div></div>
-<div><label style="font-size:.62rem;color:var(--mt);">배경</label>
-<div class="sg" id="sgBg"><button class="on" data-v="cl">체크밝게</button><button data-v="cd">체크어둡게</button><button data-v="w">흰색</button><button data-v="b">검정</button></div></div></div>
+<label class="tog" style="margin-top:2px;"><input type="checkbox" id="decBorder" checked><span class="t"></span>내부 테두리</label>
+</details>
 </div>
 
+<!-- ═══ 앞면 탭 ═══ -->
 <div class="pg" data-t="front">
+<div><div class="sc">앞면 정렬</div>
+<div class="sg" id="sgFAlign"><button data-v="left">왼쪽</button><button class="on" data-v="center">가운데</button><button data-v="right">오른쪽</button></div></div>
+<hr class="dv">
 <div><div class="sc">메인 제목</div>
 <div class="f"><input type="text" id="fT" placeholder="제목을 입력하세요"></div>
-<div class="rw" style="margin-top:2px;"><div class="f"><label>폰트</label><select id="fnT"></select></div><div class="sz" style="width:42px;"><label>크기</label><input type="number" id="tsz" value="0" min="0" max="120" placeholder="자동"></div></div>
-<div class="sr" style="margin-top:2px;"><button class="sb2 fb" data-f="tB">B</button><button class="sb2 fi" data-f="tI">I</button><button class="sb2 fu" data-f="tU">U</button><button class="sb2 fs" data-f="tS">S</button></div>
+<div class="rw" style="margin-top:2px;align-items:center;"><div class="f" style="flex:1;"><select id="fnT" style="font-size:.62rem;"></select></div><input type="number" id="tsz" value="0" min="0" max="120" placeholder="자동" style="width:36px;"><button class="sb2 fb" data-f="tB">B</button><button class="sb2 fi" data-f="tI">I</button><button class="sb2 fu" data-f="tU">U</button><button class="sb2 fs" data-f="tS">S</button></div>
 <div style="margin-top:2px;">
-<label class="tog"><input type="checkbox" id="titleGrad"><span class="t"></span>글씨 그라데이션</label>
+<label class="tog"><input type="checkbox" id="titleGrad"><span class="t"></span>그라데이션</label>
 <div id="titleGradOpts" style="display:none;margin-top:2px;">
 <div class="cr"><span>끝색상</span><input type="color" id="titleGrad2" value="#d4a830"></div>
 <div class="sg" id="sgTGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button></div>
-</div>
-</div>
-</div>
+</div></div></div>
 <div><div class="sc">부제목</div>
 <div class="f"><input type="text" id="fSb" placeholder="부제목"></div>
-<div class="rw" style="margin-top:2px;"><div class="f"><label>폰트</label><select id="fnS"></select></div><div class="sz" style="width:42px;"><label>크기</label><input type="number" id="ssz" value="11" min="5" max="40"></div></div></div>
+<div class="rw" style="margin-top:2px;align-items:center;"><div class="f" style="flex:1;"><select id="fnS" style="font-size:.62rem;"></select></div><input type="number" id="ssz" value="11" min="5" max="40" style="width:36px;"><button class="sb2 fb" data-f="sB">B</button><button class="sb2 fi" data-f="sI">I</button><button class="sb2 fu" data-f="sU">U</button><button class="sb2 fs" data-f="sS">S</button></div></div>
 <div><div class="sc">날짜 · 장소</div>
 <div class="fr"><div class="f"><input type="text" id="fDt" placeholder="날짜"></div><div class="sz"><input type="number" id="dSz" value="9" min="5" max="28"></div></div>
 <div class="fr" style="margin-top:2px;"><div class="f"><input type="text" id="fVn" placeholder="장소"></div><div class="sz"><input type="number" id="vSz" value="10" min="5" max="28"></div></div></div>
+<div><div class="sc">본문 폰트</div>
+<div class="f"><select id="fnB" style="font-size:.62rem;"></select></div></div>
 <hr class="dv">
-<div><div class="sc">위치 미세조정 (X / Y)</div>
-<div class="rw" style="margin-bottom:2px;"><div class="f" style="flex:0.5"><label>제목</label></div><div class="f"><input type="number" id="fT_x" value="0" step="1"></div><div class="f"><input type="number" id="fT_y" value="0" step="1"></div></div>
-<div class="rw" style="margin-bottom:2px;"><div class="f" style="flex:0.5"><label>부제목</label></div><div class="f"><input type="number" id="fS_x" value="0" step="1"></div><div class="f"><input type="number" id="fS_y" value="0" step="1"></div></div>
-<div class="rw"><div class="f" style="flex:0.5"><label>내용</label></div><div class="f"><input type="number" id="fD_x" value="0" step="1"></div><div class="f"><input type="number" id="fD_y" value="0" step="1"></div></div>
-</div>
-<hr class="dv">
-<div><div class="sc">절취 구역</div>
-<div class="fr"><div class="f"><label>티켓번호</label><input type="text" id="bCd" placeholder="TK-0000-00000"></div><div class="sz"><input type="number" id="cdSz" value="7" min="4" max="16" step=".5"></div></div>
-<div class="fr" style="margin-top:2px;"><div class="f"><label>바코드텍스트</label><input type="text" id="bcTx" placeholder="ADMIT ONE"></div><div class="sz"><input type="number" id="bcSz" value="7.5" min="4" max="16" step=".5"></div></div></div>
+<details><summary class="sc" style="cursor:pointer;">위치 미세조정</summary>
+<div class="adjg"><div class="gt">제목</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="fT_x_r" min="-150" max="150" value="0"><input type="number" id="fT_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="fT_y_r" min="-150" max="150" value="0"><input type="number" id="fT_y" value="0" step="1"></div></div>
+<div class="adjg"><div class="gt">부제목</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="fS_x_r" min="-150" max="150" value="0"><input type="number" id="fS_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="fS_y_r" min="-150" max="150" value="0"><input type="number" id="fS_y" value="0" step="1"></div></div>
+<div class="adjg"><div class="gt">내용</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="fD_x_r" min="-150" max="150" value="0"><input type="number" id="fD_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="fD_y_r" min="-150" max="150" value="0"><input type="number" id="fD_y" value="0" step="1"></div></div>
+</details>
 <hr class="dv">
 <div><div class="sc">앞면 이미지</div>
 <div class="iu">📷 업로드<input type="file" id="fIF" accept="image/*"></div>
 <img id="fITh" class="iv" alt=""><button class="ic" id="fICl">✕</button>
 <div class="f" style="margin-top:2px;"><label>URL</label><input type="text" id="fIU" placeholder="https://..."></div>
 <div style="margin-top:3px;"><label style="font-size:.62rem;color:var(--mt);">위치</label><div class="ipg" id="fIPG"></div></div>
+<div id="fImgOpts" style="display:none;">
 <div class="rw" style="margin-top:2px;"><div class="f"><label>투명도 <span id="fIOpV">100%</span></label><input type="range" id="fIOp" min="0" max="100" value="100"></div></div>
 <div class="rw" style="margin-top:2px;"><div class="f"><label>둥글기 <span id="fIRdV">4</span>px</label><input type="range" id="fIRd" min="0" max="100" value="4"></div></div>
-<div class="rw" style="margin-top:2px;"><div class="f"><label>X 오프셋</label><input type="number" id="fIOx" value="0" step="1"></div><div class="f"><label>Y 오프셋</label><input type="number" id="fIOy" value="0" step="1"></div></div>
-<div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="fFdOn"><span class="t"></span>페이드 효과</label>
+<div class="adjg" style="margin-top:3px;"><div class="gt">초점 %</div>
+<div class="adj"><span class="lab">가로</span><input type="range" id="fIfx_r" min="0" max="100" value="50"><input type="number" id="fIfx" value="50" min="0" max="100" step="1"></div>
+<div class="adj"><span class="lab">세로</span><input type="range" id="fIfy_r" min="0" max="100" value="50"><input type="number" id="fIfy" value="50" min="0" max="100" step="1"></div></div>
+<div class="adjg" style="margin-top:3px;"><div class="gt">오프셋</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="fIOx_r" min="-300" max="300" value="0"><input type="number" id="fIOx" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="fIOy_r" min="-300" max="300" value="0"><input type="number" id="fIOy" value="0" step="1"></div></div>
+<div id="fCustom" style="display:none;margin-top:3px;">
+<div class="adjg"><div class="gt">커스텀 크기·곡률</div>
+<div class="adj"><span class="lab">너비%</span><input type="range" id="fIcW_r" min="2" max="120" value="50"><input type="number" id="fIcW" value="50" min="1" max="200" step="1"></div>
+<div class="adj"><span class="lab">높이%</span><input type="range" id="fIcH_r" min="2" max="120" value="50"><input type="number" id="fIcH" value="50" min="1" max="200" step="1"></div>
+<div class="adj"><span class="lab">곡률↔</span><input type="range" id="fIcRx_r" min="0" max="50" value="8"><input type="number" id="fIcRx" value="8" min="0" max="50" step="1"></div>
+<div class="adj"><span class="lab">곡률↕</span><input type="range" id="fIcRy_r" min="0" max="50" value="8"><input type="number" id="fIcRy" value="8" min="0" max="50" step="1"></div></div></div>
+<div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="fFdOn"><span class="t"></span>페이드</label>
 <div id="fFdOpts" style="display:none;margin-top:3px;">
 <div class="fd" id="fFdDir"><button class="on" data-v="right">→</button><button data-v="left">←</button><button data-v="down">↓</button><button data-v="up">↑</button></div>
 <div class="f" style="margin-top:2px;"><label>범위 <span id="fFdRV">40</span>%</label><input type="range" id="fFdR" min="5" max="80" value="40"></div>
 <div class="rw" style="margin-top:2px;"><div class="cr"><span>색상</span><input type="color" id="fFdCol" value="#f5f0e0"></div><label class="tog" style="margin-left:4px;"><input type="checkbox" id="fFdTr"><span class="t"></span>투명</label></div>
-</div>
-</div>
-</div>
+</div></div>
+</div></div>
 </div>
 
+<!-- ═══ 뒷면 탭 ═══ -->
 <div class="pg" data-t="back">
-<div><div class="sc">뒷면 레이아웃</div>
+<div><div class="sc">뒷면 정렬</div>
+<div class="sg" id="sgBAlign"><button data-v="left">왼쪽</button><button class="on" data-v="center">가운데</button><button data-v="right">오른쪽</button></div></div>
+<div><div class="sc">레이아웃</div>
 <div class="btg" id="bkTpl"><div class="btc on" data-v="default">📋기본</div><div class="btc" data-v="split">📊좌우</div><div class="btc" data-v="card">🎴카드</div><div class="btc" data-v="simple">✨심플</div></div></div>
+<hr class="dv">
 <div><div class="sc">이벤트명</div>
-<div class="fr"><div class="f"><input type="text" id="bTt" placeholder="이벤트명"></div><div class="sz"><input type="number" id="btSz" value="18" min="8" max="40"></div></div></div>
+<div class="f"><input type="text" id="bTt" placeholder="이벤트명"></div>
+<div class="rw" style="margin-top:2px;align-items:center;"><div class="f" style="flex:1;"><select id="bFnTitleInline" style="font-size:.62rem;"></select></div><input type="number" id="btSz" value="18" min="8" max="40" style="width:36px;"><button class="sb2 fb" data-f="bttB">B</button><button class="sb2 fi" data-f="bttI">I</button><button class="sb2 fu" data-f="bttU">U</button><button class="sb2 fs" data-f="bttS">S</button></div>
+<div style="margin-top:2px;"><label class="tog"><input type="checkbox" id="bttGrad"><span class="t"></span>그라데이션</label>
+<div id="bttGradOpts" style="display:none;margin-top:3px;">
+<div class="cr"><span>끝색상</span><input type="color" id="bttGrad2" value="#d4a830"></div>
+<div class="sg" id="sgBttGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button><button data-v="45deg">↗</button></div>
+</div></div></div>
 <div><div class="sc">정보 (라벨 · 값)</div>
 <div class="rw" style="margin-bottom:2px;"><div class="f" style="width:50px;flex:none;"><input type="text" id="bL1" value="좌석" placeholder="라벨"></div><div class="f"><input type="text" id="bSt" placeholder="좌석 등 정보"></div><div class="sz"><input type="number" id="biSz" value="10" min="5" max="24"></div></div>
 <div class="rw" style="margin-bottom:2px;"><div class="f" style="width:50px;flex:none;"><input type="text" id="bL2" value="날짜" placeholder="라벨"></div><div class="f"><input type="text" id="bV2" placeholder="값"></div></div>
@@ -204,26 +249,48 @@ input[type=color]{width:24px;height:20px;border:1px solid var(--bd);border-radiu
 <div><div class="sc">안내사항</div>
 <div class="fr"><div class="f"><textarea id="bNt" placeholder="안내사항을 입력하세요"></textarea></div><div class="sz"><input type="number" id="bnSz" value="8.5" min="5" max="20" step=".5"></div></div></div>
 <hr class="dv">
-<div><div class="sc">뒷면 텍스트 전체 이동</div>
-<div class="rw">
-<div class="f"><label>X 오프셋</label><input type="number" id="bTxOx" value="0" step="1"></div>
-<div class="f"><label>Y 오프셋</label><input type="number" id="bTxOy" value="0" step="1"></div>
-</div></div>
+<details><summary class="sc" style="cursor:pointer;">글 위치 조정</summary>
+<div class="adjg"><div class="gt">전체</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="bTxOx_r" min="-150" max="150" value="0"><input type="number" id="bTxOx" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="bTxOy_r" min="-150" max="150" value="0"><input type="number" id="bTxOy" value="0" step="1"></div></div>
+<div class="adjg"><div class="gt">제목</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="bTt_x_r" min="-150" max="150" value="0"><input type="number" id="bTt_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="bTt_y_r" min="-150" max="150" value="0"><input type="number" id="bTt_y" value="0" step="1"></div></div>
+<div class="adjg"><div class="gt">정보</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="bInf_x_r" min="-150" max="150" value="0"><input type="number" id="bInf_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="bInf_y_r" min="-150" max="150" value="0"><input type="number" id="bInf_y" value="0" step="1"></div></div>
+<div class="adjg"><div class="gt">안내</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="bNt_x_r" min="-150" max="150" value="0"><input type="number" id="bNt_x" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="bNt_y_r" min="-150" max="150" value="0"><input type="number" id="bNt_y" value="0" step="1"></div></div>
+</details>
 <hr class="dv">
 <div><div class="sc">뒷면 이미지</div>
 <div class="iu">📷 업로드<input type="file" id="bIF" accept="image/*"></div>
 <img id="bITh" class="iv" alt=""><button class="ic" id="bICl">✕</button>
 <div class="f" style="margin-top:2px;"><label>URL</label><input type="text" id="bIU" placeholder="https://..."></div>
 <div style="margin-top:3px;"><label style="font-size:.62rem;color:var(--mt);">위치</label><div class="ipg" id="bIPG"></div></div>
+<div id="bImgOpts" style="display:none;">
 <div class="rw" style="margin-top:2px;"><div class="f"><label>투명도 <span id="bIOpV">100%</span></label><input type="range" id="bIOp" min="0" max="100" value="100"></div></div>
-<div class="rw" style="margin-top:2px;"><div class="f"><label>X 오프셋</label><input type="number" id="bIOx" value="0" step="1"></div><div class="f"><label>Y 오프셋</label><input type="number" id="bIOy" value="0" step="1"></div></div>
-<div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="bFdOn"><span class="t"></span>페이드 효과</label>
+<div class="rw" style="margin-top:2px;"><div class="f"><label>둥글기 <span id="bIRdV">4</span>px</label><input type="range" id="bIRd" min="0" max="100" value="4"></div></div>
+<div class="adjg" style="margin-top:3px;"><div class="gt">초점 %</div>
+<div class="adj"><span class="lab">가로</span><input type="range" id="bIfx_r" min="0" max="100" value="50"><input type="number" id="bIfx" value="50" min="0" max="100" step="1"></div>
+<div class="adj"><span class="lab">세로</span><input type="range" id="bIfy_r" min="0" max="100" value="50"><input type="number" id="bIfy" value="50" min="0" max="100" step="1"></div></div>
+<div class="adjg" style="margin-top:3px;"><div class="gt">오프셋</div>
+<div class="adj"><span class="lab">X</span><input type="range" id="bIOx_r" min="-300" max="300" value="0"><input type="number" id="bIOx" value="0" step="1"></div>
+<div class="adj"><span class="lab">Y</span><input type="range" id="bIOy_r" min="-300" max="300" value="0"><input type="number" id="bIOy" value="0" step="1"></div></div>
+<div id="bCustom" style="display:none;margin-top:3px;">
+<div class="adjg"><div class="gt">커스텀 크기·곡률</div>
+<div class="adj"><span class="lab">너비%</span><input type="range" id="bIcW_r" min="2" max="120" value="50"><input type="number" id="bIcW" value="50" min="1" max="200" step="1"></div>
+<div class="adj"><span class="lab">높이%</span><input type="range" id="bIcH_r" min="2" max="120" value="50"><input type="number" id="bIcH" value="50" min="1" max="200" step="1"></div>
+<div class="adj"><span class="lab">곡률↔</span><input type="range" id="bIcRx_r" min="0" max="50" value="8"><input type="number" id="bIcRx" value="8" min="0" max="50" step="1"></div>
+<div class="adj"><span class="lab">곡률↕</span><input type="range" id="bIcRy_r" min="0" max="50" value="8"><input type="number" id="bIcRy" value="8" min="0" max="50" step="1"></div></div></div>
+<div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="bFdOn"><span class="t"></span>페이드</label>
 <div id="bFdOpts" style="display:none;margin-top:3px;">
 <div class="fd" id="bFdDir"><button class="on" data-v="right">→</button><button data-v="left">←</button><button data-v="down">↓</button><button data-v="up">↑</button></div>
 <div class="f" style="margin-top:2px;"><label>범위 <span id="bFdRV">40</span>%</label><input type="range" id="bFdR" min="5" max="80" value="40"></div>
 <div class="rw" style="margin-top:2px;"><div class="cr"><span>색상</span><input type="color" id="bFdCol" value="#f5f0e0"></div><label class="tog" style="margin-left:4px;"><input type="checkbox" id="bFdTr"><span class="t"></span>투명</label></div>
 </div></div>
-</div>
+</div></div>
 </div>
 
 </div></div>
@@ -232,14 +299,12 @@ input[type=color]{width:24px;height:20px;border:1px solid var(--bd);border-radiu
 <div class="pvh">
 <div class="pvt"><button class="pt on" data-s="front">앞면</button><button class="pt" data-s="back">뒷면</button></div>
 <div class="pa">
-<select id="expTarget" style="font-family:var(--ui); font-size:.62rem; padding:.1rem .2rem; border:1px solid var(--bd); border-radius:4px; background:var(--pn); color:var(--tx); margin-right:4px;">
-  <option value="all">전체</option>
-  <option value="front">앞면만</option>
-  <option value="back">뒷면만</option>
-</select>
-<button class="pb" id="dPNG">🖼️PNG</button>
-<button class="pb pr" id="dHA">💾HTML저장</button>
-<button class="pb" id="cpBlog">📝블로그복사</button>
+<select id="expTarget" style="font-family:var(--ui);font-size:.58rem;padding:.1rem .15rem;border:1px solid var(--bd);border-radius:4px;background:var(--pn);color:var(--tx);">
+<option value="all">전체</option><option value="front">앞면</option><option value="back">뒷면</option></select>
+<button class="pb" id="dPNG" title="PNG 저장">🖼️</button>
+<button class="pb" id="dHA" title="HTML 저장">💾</button>
+<button class="pb" id="cpBlog" title="블로그 복사">📝</button>
+<button class="pb" id="btnMode" title="밝기 전환">🌙</button>
 </div></div>
 <div class="pc" id="cv"></div>
 </div>
@@ -261,24 +326,34 @@ const TH=[
 {id:'spring',n:'🌿봄날',bg:'#f0f8e8',ac:'#3a8020',tx:'#1a3010',sb:'#6a9050',f1:"'OngleipParkDahyeon',sans-serif",f2:"'Noto Sans KR',sans-serif",bd:'#80c060'},
 ];
 const FN=[['','기본'],["'Noto Sans KR',sans-serif",'Noto Sans'],["'Nanum Gothic',sans-serif",'나눔고딕'],["'Nanum Myeongjo',serif",'나눔명조'],["'Ridibatang',serif",'리디바탕'],["'GangwonEduModu',sans-serif",'강원교육'],["'OngleipParkDahyeon',sans-serif",'온글잎'],["'Playfair Display',serif",'Playfair'],["'DM Mono',monospace",'DM Mono'],["'Noto Serif KR',serif",'Noto Serif'],["Georgia,serif",'Georgia'],["Arial,sans-serif",'Arial']];
-const IPS=[{id:'none',n:'없음'},{id:'left',n:'왼쪽'},{id:'right',n:'오른쪽'},{id:'top',n:'상단'},{id:'bottom',n:'하단'},{id:'bg',n:'배경'},{id:'center',n:'중앙'},{id:'full',n:'전체'}];
+const IPS=[{id:'none',n:'없음'},{id:'left',n:'왼쪽'},{id:'right',n:'오른쪽'},{id:'top',n:'상단'},{id:'bottom',n:'하단'},{id:'bg',n:'배경'},{id:'center',n:'중앙'},{id:'full',n:'전체'},{id:'custom',n:'커스텀'}];
 const EDS=[{id:'straight',n:'직선'},{id:'round',n:'둥글게'},{id:'roundXL',n:'크게둥근'},{id:'chamfer',n:'사선컷'},{id:'waveS',n:'물결소'},{id:'waveL',n:'물결대'},{id:'zigS',n:'톱니소'},{id:'zigL',n:'톱니대'},{id:'zigSH',n:'톱니소(상하)'},{id:'zigLH',n:'톱니대(상하)'},{id:'scallop',n:'반원패임'},{id:'stamp',n:'스탬프'}];
 
 // ✨ 텍스트 개별 오프셋 변수(fT_x, fT_y, fS_x, fS_y, fD_x, fD_y) 추가
 const S={theme:'retro',orient:'landscape',edge:'straight',side:'front',fIP:'none',bIP:'none',bkTpl:'default',
 cBg:'#f5f0e0',cAc:'#c8410a',cTx:'#2a1f10',cSb:'#8a6a40',
 bgGrad:false,bgGrad2:'#d4a830',bgGradDir:'135deg',
-tW:500,tH:210,tS:130, tAl:'center',
+tW:500,tH:210,tS:130, tAl:'center', fAl:'center', bAl:'center',
 stOn:true,stPos:['left'],stW:6,bcSt:'barcode',bDen:20,
 fT:'',fSb:'',fDt:'',fVn:'',
 titleGrad:false,titleGrad2:'#d4a830',titleGradDir:'135deg',
 bTt:'',bSt:'',bPr:'',bNt:'',bCd:'',bcTx:'',
 bL1:'좌석',bL2:'날짜',bL3:'장소',bL4:'가격',bV2:'',bV3:'',
-fnT:'',fnS:'',tsz:0,ssz:11,dSz:9,vSz:10,btSz:18,biSz:10,bnSz:8.5,cdSz:7,bcSz:7.5,
+fnT:'',fnS:'',fnB:'',tsz:0,ssz:11,dSz:9,vSz:10,btSz:18,biSz:10,bnSz:8.5,cdSz:7,bcSz:7.5,
+cTitle:'#2a1f10',cSub:'#8a6a40',cBody:'#8a6a40',
+bkOverride:false, bFnTitle:'',bFnSub:'',bFnBody:'', bcTitle:'',bcSub:'',bcBody:'',
+bttGrad:false,bttGrad2:'#d4a830',bttGradDir:'135deg',
+fIfx:50,fIfy:50, bIfx:50,bIfy:50,
 tB:false,tI:false,tU:false,tS2:false,
+sB:false,sI:false,sU:false,sS2:false,
+bttB:false,bttI:false,bttU:false,bttS2:false,
+showBcTx:true,showBcCd:true,
 fID:'',fIU:'',fIOp:100,fIRd:4,fIOx:0,fIOy:0, fT_x:0, fT_y:0, fS_x:0, fS_y:0, fD_x:0, fD_y:0, fFdOn:false,fFdDir:'right',fFdR:40,fFdCol:'',fFdTr:false,
+fIcW:50,fIcH:50,fIcRx:8,fIcRy:8,
 bID:'',bIU:'',bIP:'none',bIOp:100,bIRd:4,bIOx:0,bIOy:0, bTxOx:0, bTxOy:0, bFdOn:false,bFdDir:'right',bFdR:40,bFdCol:'',bFdTr:false,
-decDots:true,decBorder:true};
+bIcW:50,bIcH:50,bIcRx:8,bIcRy:8,
+bTt_x:0,bTt_y:0, bInf_x:0,bInf_y:0, bNt_x:0,bNt_y:0,
+decDots:true,decBorder:true, stubLayout:'two'};
 
 function gt(){return TH.find(t=>t.id===S.theme)||TH[0];}
 
@@ -328,47 +403,69 @@ function buildTicket(side){
   const th=gt();
   const W=Math.max(150,S.tW),H=Math.max(80,S.tH),stub=Math.max(40,Math.min(S.tS,Math.floor(W*.4)));
   const isL=S.orient==='landscape';
-  const mainW=isL?W-stub:W, mainH=isL?H:H-stub;
+  let mainW=isL?W-stub:W, mainH=isL?H:H-stub;
   const ac=S.cAc,tx=S.cTx,sb=S.cSb,bg=S.cBg;
+  // ── 폰트/색상 3그룹 (제목/부제목/본문·정보). 뒷면은 분리 토글(bkOverride) ON일 때만 별도값 사용 ──
+  const isBack=side==='back';
+  const useB=isBack&&S.bkOverride;
+  const fontTitle = (useB ? S.bFnTitle : S.fnT) || S.fnT || th.f1;
+  const fontSub   = (useB ? S.bFnSub  : S.fnS) || S.fnS || th.f2;
+  const fontBody  = (useB ? S.bFnBody : S.fnB) || S.fnB || th.f2;
+  const colTitle  = (useB ? S.bcTitle : S.cTitle) || S.cTitle || tx;
+  const colSub    = (useB ? S.bcSub   : S.cSub)   || S.cSub   || sb;
+  const colBody   = (useB ? S.bcBody  : S.cBody)  || S.cBody  || sb;
   const clip=clipPath(W,H,S.edge);
-  const tFont=S.fnT||th.f1, sFont=S.fnS||th.f2;
+  const tFont=fontTitle, sFont=fontSub;
   const titleDisp=ph(S.fT,'제목을 입력하세요');
   const phColor='#bbb';
   let ts=S.tsz>0?S.tsz:Math.min(48,Math.max(14,isL?(mainW-80)/Math.max((S.fT||'제목').length,3)*1.4:(mainW-20)/Math.max((S.fT||'제목').length,3)*2));
   const ss=S.ssz||11;
   const bgCss=S.bgGrad?`linear-gradient(${S.bgGradDir},${S.cBg},${S.bgGrad2})`:S.cBg;
   let stripStyle='';
+  let stripOverlay='';
+  let stripW={top:0,right:0,bottom:0,left:0};
   if(S.stOn&&S.stPos.length){
-    const sw=S.stW+'px';
-    const sides={top:'border-top',right:'border-right',bottom:'border-bottom',left:'border-left'};
-    S.stPos.forEach(p=>{if(sides[p])stripStyle+=`${sides[p]}:${sw} solid ${ac};`;});
+    const sw=S.stW;
+    // ✨ 띠지를 border + box-sizing:border-box로 (블로그에서 absolute 제거 대응)
+    S.stPos.forEach(p=>{
+      if(p==='top'){stripStyle+=`border-top:${sw}px solid ${ac};`;stripW.top=sw;}
+      else if(p==='bottom'){stripStyle+=`border-bottom:${sw}px solid ${ac};`;stripW.bottom=sw;}
+      else if(p==='left'){stripStyle+=`border-left:${sw}px solid ${ac};`;stripW.left=sw;}
+      else if(p==='right'){stripStyle+=`border-right:${sw}px solid ${ac};`;stripW.right=sw;}
+    });
   }
+  // 띠지 두께만큼 내부 크기 감소 (box-sizing:border-box이므로)
+  const innerW=W-stripW.left-stripW.right;
+  const innerH=H-stripW.top-stripW.bottom;
+  // mainW/mainH를 띠지 감안 크기로 재정의
+  mainW=isL?innerW-stub:innerW; mainH=isL?innerH:innerH-stub;
+  const adjMainW=mainW, adjMainH=mainH;
   const perfStyle=isL
     ?`position:absolute;top:0;bottom:0;right:${stub}px;width:0;border-right:2px dashed rgba(${hexRgb(tx)},.2);z-index:5;`
     :`position:absolute;left:0;right:0;bottom:${stub}px;height:0;border-bottom:2px dashed rgba(${hexRgb(tx)},.2);z-index:5;`;
-  const innerBorder=S.decBorder?`border:1px solid rgba(${hexRgb(ac)},.25);border-radius:${S.edge==='round'?'10px':S.edge==='roundXL'?'26px':'0'};margin:8px;`:'margin:8px;';
   
   let barcodeSvg='';
   if(S.bcSt==='barcode'){
     const n=S.bDen||20,seed=S.bCd||'TK';
     const bars=[];for(let i=0;i<n;i++)bars.push((seed.charCodeAt(i%seed.length)%3)+1);
     const tot=bars.reduce((a,b)=>a+b,0);
+    // ✨ div 기반 바코드 (블로그에서 SVG 차단됨)
     if(isL){
       const bH=mainH-36,bW=stub-24;
-      let rects='',cy=0,u=bH/tot;
-      bars.forEach((bw,i)=>{if(i%2===0)rects+=`<rect x="0" y="${cy.toFixed(1)}" width="${bW}" height="${Math.max(.5,(bw*u-.3)).toFixed(1)}" fill="${tx}" opacity=".8"/>`;cy+=bw*u;});
-      barcodeSvg=`<svg width="${bW}" height="${bH}" style="display:block;margin:auto;">${rects}</svg>`;
+      let divs='';let cy=0;const u=bH/tot;
+      bars.forEach((bw,i)=>{const h=Math.max(1,Math.round(bw*u-.3));if(i%2===0)divs+=`<div style="width:${bW}px;height:${h}px;background:${tx};opacity:.8;"></div>`;else divs+=`<div style="width:${bW}px;height:${h}px;"></div>`;});
+      barcodeSvg=`<div style="display:flex;flex-direction:column;align-items:center;width:${bW}px;">${divs}</div>`;
     }else{
       const bW=mainW-20,bH=stub-20;
-      let rects='',cx=0,u=bW/tot;
-      bars.forEach((bw,i)=>{if(i%2===0)rects+=`<rect x="${cx.toFixed(1)}" y="0" width="${Math.max(.5,(bw*u-.3)).toFixed(1)}" height="${bH}" fill="${tx}" opacity=".8"/>`;cx+=bw*u;});
-      barcodeSvg=`<svg width="${bW}" height="${bH}" style="display:block;margin:auto;">${rects}</svg>`;
+      let divs='';const u=bW/tot;
+      bars.forEach((bw,i)=>{const w=Math.max(1,Math.round(bw*u-.3));if(i%2===0)divs+=`<div style="display:inline-block;width:${w}px;height:${bH}px;background:${tx};opacity:.8;"></div>`;else divs+=`<div style="display:inline-block;width:${w}px;height:${bH}px;"></div>`;});
+      barcodeSvg=`<div style="display:flex;flex-direction:row;justify-content:center;height:${bH}px;line-height:0;font-size:0;">${divs}</div>`;
     }
   }
 
   const dotLine=S.decDots?`<div style="height:3px;background:repeating-linear-gradient(to right,rgba(${hexRgb(tx)},.3) 0 2px,transparent 2px 8px);margin:4px 0;"></div>`:'';
 
-  function imgDiv(imgSrc,pos,op,rd,ox,oy,fdOn,fdDir,fdR,fdCol,fdTr,mW2,mH2){
+  function imgDiv(imgSrc,pos,op,rd,ox,oy,fdOn,fdDir,fdR,fdCol,fdTr,mW2,mH2,cust){
     if(!imgSrc||pos==='none')return'';
     const a=op/100;
     const fadeMask=fdOn?(()=>{
@@ -380,114 +477,177 @@ function buildTicket(side){
     const fadeOverlay=(fdOn&&!fdTr&&fdCol)?(()=>{
       const dirs={right:'to left',left:'to right',down:'to top',up:'to bottom'};
       const d=dirs[fdDir]||'to left';
-      return`<div style="position:absolute;inset:0;background:linear-gradient(${d},transparent ${100-fdR}%,${fdCol} 100%);pointer-events:none;z-index:2;"></div>`;
+      return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;background:linear-gradient(${d},transparent ${100-fdR}%,${fdCol} 100%);pointer-events:none;z-index:2;"></div>`;
     })():'';
-    const base=`background:url('${imgSrc}') center/cover no-repeat;opacity:${a};border-radius:${rd}px;${maskStyle}`;
+    const fx=(cust&&cust.fx!=null)?cust.fx:50, fy=(cust&&cust.fy!=null)?cust.fy:50;
+    const pos2=`${fx}% ${fy}%`;
+    const base=`background:url('${imgSrc}') ${pos2}/cover no-repeat;opacity:${a};border-radius:${rd}px;${maskStyle}`;
+    const baseNoRd=`background:url('${imgSrc}') ${pos2}/cover no-repeat;opacity:${a};${maskStyle}`;
     const offX=ox||0, offY=oy||0;
-    if(pos==='bg')return`<div style="position:absolute;inset:0;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div>${fadeOverlay}`;
-    if(pos==='full')return`<div style="position:absolute;inset:0;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div><div style="position:absolute;inset:0;background:${bg};opacity:.45;z-index:1;"></div>${fadeOverlay}`;
-    if(pos==='left'){const iw=Math.floor(mH2*.7);return`<div style="position:absolute;left:${6+offX}px;top:${6+offY}px;bottom:6px;width:${iw}px;${base}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='right'){const iw=Math.floor(mH2*.65);return`<div style="position:absolute;right:${6-offX}px;top:${6+offY}px;bottom:6px;width:${iw}px;${base}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='top'){const ih=Math.floor(mH2*.45);const defMask=`mask-image:linear-gradient(to bottom,black 55%,transparent);-webkit-mask-image:linear-gradient(to bottom,black 55%,transparent);`;return`<div style="position:absolute;left:0;right:0;top:${offY}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='bottom'){const ih=Math.floor(mH2*.4);const defMask=`mask-image:linear-gradient(to top,black 55%,transparent);-webkit-mask-image:linear-gradient(to top,black 55%,transparent);`;return`<div style="position:absolute;left:0;right:0;bottom:${-offY}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
+    // ✨ 커스텀 모드: X/Y 위치, %크기, 곡률(가로/세로 반경 독립)
+    if(pos==='custom'){
+      const c=cust||{w:50,h:50,rx:8,ry:8};
+      const cw=Math.max(1,Math.round(mW2*(c.w/100)));
+      const ch=Math.max(1,Math.round(mH2*(c.h/100)));
+      const radius=`border-radius:${c.rx}% / ${c.ry}%;`;
+      return`<div style="position:absolute;left:${offX}px;top:${offY}px;width:${cw}px;height:${ch}px;${baseNoRd}${radius}z-index:1;"></div>${fadeOverlay}`;
+    }
+    if(pos==='bg')return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div>${fadeOverlay}`;
+    if(pos==='full')return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div><div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;background:${bg};opacity:.45;z-index:1;"></div>${fadeOverlay}`;
+    if(pos==='left'){const iw=Math.floor(mH2*.7);const ih=mH2-12;return`<div style="position:absolute;left:${6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;${base}z-index:1;"></div>${fadeOverlay}`;}
+    if(pos==='right'){const iw=Math.floor(mH2*.65);const ih=mH2-12;return`<div style="position:absolute;left:${mW2-iw-6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;${base}z-index:1;"></div>${fadeOverlay}`;}
+    if(pos==='top'){const ih=Math.floor(mH2*.45);const defMask=`mask-image:linear-gradient(to bottom,black 55%,transparent);-webkit-mask-image:linear-gradient(to bottom,black 55%,transparent);`;return`<div style="position:absolute;left:0px;top:${offY}px;width:${mW2}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
+    if(pos==='bottom'){const ih=Math.floor(mH2*.4);const defMask=`mask-image:linear-gradient(to top,black 55%,transparent);-webkit-mask-image:linear-gradient(to top,black 55%,transparent);`;return`<div style="position:absolute;left:0px;top:${mH2-ih+offY}px;width:${mW2}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
     if(pos==='center'){const sz=Math.min(mW2,mH2)*.45;return`<div style="position:absolute;left:50%;top:50%;transform:translate(calc(-50% + ${offX}px),calc(-50% + ${offY}px));width:${sz}px;height:${sz}px;${base}border-radius:50%;z-index:1;"></div>${fadeOverlay}`;}
     return'';
   }
 
   const fImg=S.fID||S.fIU||'';
-  const imgHtml=imgDiv(fImg,S.fIP,S.fIOp,S.fIRd,S.fIOx,S.fIOy,S.fFdOn,S.fFdDir,S.fFdR,S.fFdCol||bg,S.fFdTr,mainW,mainH);
+  const imgHtml=imgDiv(fImg,S.fIP,S.fIOp,S.fIRd,S.fIOx,S.fIOy,S.fFdOn,S.fFdDir,S.fFdR,S.fFdCol||bg,S.fFdTr,mainW,mainH,{w:S.fIcW,h:S.fIcH,rx:S.fIcRx,ry:S.fIcRy,fx:S.fIfx,fy:S.fIfy});
   const contentML=fImg&&S.fIP==='left'?Math.floor(mainH*.7)+12:0;
   const contentMR=fImg&&S.fIP==='right'?Math.floor(mainH*.65)+12:0;
 
   const bImg=S.bID||S.bIU||'';
-  const bImgHtml=imgDiv(bImg,S.bIP,S.bIOp,S.bIRd||4,S.bIOx,S.bIOy,S.bFdOn,S.bFdDir,S.bFdR,S.bFdCol||bg,S.bFdTr,mainW,mainH);
+  const bImgHtml=imgDiv(bImg,S.bIP,S.bIOp,S.bIRd||4,S.bIOx,S.bIOy,S.bFdOn,S.bFdDir,S.bFdR,S.bFdCol||bg,S.bFdTr,mainW,mainH,{w:S.bIcW,h:S.bIcH,rx:S.bIcRx,ry:S.bIcRy,fx:S.bIfx,fy:S.bIfy});
 
-  const titleColorStyle=S.titleGrad?`background:linear-gradient(${S.titleGradDir},${tx},${S.titleGrad2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${tx};`;
+  const titleColorStyle=S.titleGrad?`background:linear-gradient(${S.titleGradDir},${colTitle},${S.titleGrad2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
 
   // ✨ 제목, 부제목, 날짜/장소가 완전히 독립된 블록으로 나뉘어 개별적으로 위치 이동이 적용됩니다!
   const subDisp=ph(S.fSb,'부제목');
   const dtDisp=ph(S.fDt,'날짜');
   const vnDisp=ph(S.fVn,'장소');
-  const align = S.tAl || 'center'; 
+  const align = S.fAl || S.tAl || 'center';  // 앞면 정렬
+  const bAlign = S.bAl || S.tAl || 'center'; // 뒷면 정렬
+  // 앞면 콘텐츠 박스용: margin 없는 내부 테두리 (박스를 absolute+명시크기로 배치하므로 margin 불필요)
+  const innerBorderNoMargin=S.decBorder?`border:1px solid rgba(${hexRgb(ac)},.25);border-radius:${S.edge==='round'?'10px':S.edge==='roundXL'?'26px':'0'};`:'';
 
-  let frontContent=`
-    ${imgHtml}
-    <div style="position:relative;z-index:2;${innerBorder}display:flex;flex-direction:column;justify-content:center;height:100%;padding:${isL?'8px 12px':'12px 8px'};margin-left:${contentML}px;margin-right:${contentMR}px;">
-      ${dotLine}
-      <div style="display:flex; flex-direction:column; gap:8px; padding:${isL?'8px 0':'12px 0'};">
-        <div style="text-align:${align}; transform:translate(${S.fT_x||0}px, ${S.fT_y||0}px);">
-          <div style="font-family:${tFont};font-size:${ts}px;font-weight:${S.tB?700:(tFont.includes('Bebas')?400:700)};${S.tI?'font-style:italic;':''}${S.tU?'text-decoration:underline;':''}${S.tS2?'text-decoration:line-through;':''}${titleDisp.ph?'color:'+phColor+';':titleColorStyle}line-height:1.2;">${titleDisp.t}</div>
+  // ✨ 빈 값 미출력: placeholder면 결과물에서 제거
+  const fTitleHtml=titleDisp.ph?'':`<div style="text-align:${align};transform:translate(${S.fT_x||0}px, ${S.fT_y||0}px);"><div style="font-family:${tFont};font-size:${ts}px;font-weight:${S.tB?700:(tFont.includes('Bebas')?400:700)};${S.tI?'font-style:italic;':''}${S.tU?'text-decoration:underline;':''}${S.tS2?'text-decoration:line-through;':''}${titleColorStyle}line-height:1.2;">${titleDisp.t}</div></div>`;
+  const subDeco=(S.sU&&S.sS2)?'text-decoration:underline line-through;':S.sU?'text-decoration:underline;':S.sS2?'text-decoration:line-through;':'';
+  const fSubHtml=subDisp.ph?'':`<div style="text-align:${align};transform:translate(${S.fS_x||0}px, ${S.fS_y||0}px);"><div style="font-family:${sFont};font-size:${ss}px;${S.sB?'font-weight:700;':''}${S.sI?'font-style:italic;':''}${subDeco}color:${colSub};letter-spacing:1.5px;">${subDisp.t}</div></div>`;
+  const fDtHtml=dtDisp.ph?'':'<div style="font-family:'+fontBody+';font-size:'+S.dSz+'px;color:'+colBody+';letter-spacing:1px;">'+dtDisp.t+'</div>';
+  const fVnHtml=vnDisp.ph?'':'<div style="font-family:'+fontBody+';font-size:'+S.vSz+'px;color:'+colBody+';font-weight:500;margin-top:1px;">'+vnDisp.t+'</div>';
+  const fInfoHtml=(fDtHtml||fVnHtml)?`<div style="text-align:${align};transform:translate(${S.fD_x||0}px, ${S.fD_y||0}px);">${fDtHtml}${fVnHtml}</div>`:'';
+
+  // ✨ 블로그 호환: 이미지+콘텐츠 겹치기. 이미지를 정상흐름(높이0)에 넣고 콘텐츠를 같은 위치에 올림
+  // 이미지가 있으면: 이미지div(overflow:hidden 클립) → 콘텐츠div(margin-top:-높이로 겹침)
+  // 이미지가 없으면: 콘텐츠div만
+  const fPadTop=8, fPadBot=8, fPadLeft=8+contentML, fPadRight=8+contentMR;
+  let frontContent;
+  if(imgHtml){
+    frontContent=`
+    <div style="position:relative;width:${mainW}px;height:${mainH}px;overflow:hidden;">${imgHtml}</div>
+    <div style="position:relative;z-index:2;width:${mainW}px;height:${mainH}px;margin-top:-${mainH}px;box-sizing:border-box;padding:${fPadTop}px ${fPadRight}px ${fPadBot}px ${fPadLeft}px;">
+      <div style="${innerBorderNoMargin}width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:${isL?'8px 12px':'12px 8px'};">
+        ${dotLine}
+        <div style="display:flex;flex-direction:column;gap:8px;padding:${isL?'8px 0':'12px 0'};">
+          ${fTitleHtml}${fSubHtml}${fInfoHtml}
         </div>
-        <div style="text-align:${align}; transform:translate(${S.fS_x||0}px, ${S.fS_y||0}px);">
-          <div style="font-family:${sFont};font-size:${ss}px;color:${subDisp.ph?phColor:sb};letter-spacing:1.5px;">${subDisp.t}</div>
-        </div>
-        <div style="text-align:${align}; transform:translate(${S.fD_x||0}px, ${S.fD_y||0}px);">
-          <div style="font-family:${th.f2};font-size:${S.dSz}px;color:${dtDisp.ph?phColor:sb};letter-spacing:1px;">${dtDisp.t}</div>
-          <div style="font-family:${th.f2};font-size:${S.vSz}px;color:${vnDisp.ph?phColor:tx};font-weight:500;margin-top:1px;">${vnDisp.t}</div>
-        </div>
+        ${dotLine}
       </div>
-      ${dotLine}
     </div>`;
+  }else{
+    frontContent=`
+    <div style="position:relative;z-index:2;width:${mainW}px;height:${mainH}px;box-sizing:border-box;padding:${fPadTop}px ${fPadRight}px ${fPadBot}px ${fPadLeft}px;">
+      <div style="${innerBorderNoMargin}width:100%;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:${isL?'8px 12px':'12px 8px'};">
+        ${dotLine}
+        <div style="display:flex;flex-direction:column;gap:8px;padding:${isL?'8px 0':'12px 0'};">
+          ${fTitleHtml}${fSubHtml}${fInfoHtml}
+        </div>
+        ${dotLine}
+      </div>
+    </div>`;
+  }
 
   const bttDisp=ph(S.bTt,'이벤트명');
+  // 뒷면 이벤트 제목 색상/그라데이션 + B/I/U/S
+  const bttColorStyle=S.bttGrad?`background:linear-gradient(${S.bttGradDir},${colTitle},${S.bttGrad2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
+  const bttDeco=(S.bttU&&S.bttS2)?'text-decoration:underline line-through;':S.bttU?'text-decoration:underline;':S.bttS2?'text-decoration:line-through;':'';
+  const bttStyleStr=`font-family:${fontTitle};${S.bttB?'font-weight:700;':''}${S.bttI?'font-style:italic;':''}${bttDeco}${bttDisp.ph?'color:'+phColor+';':bttColorStyle}`;
   const bcdDisp=ph(S.bCd,'TK-0000-00000');
   const rawRows=[[S.bL1,S.bSt],[S.bL2,S.bV2],[S.bL3,S.bV3],[S.bL4,S.bPr]];
+  // ✨ 빈 값 미출력: 라벨과 값 모두 비어있으면 행 자체 제거
   const rows=rawRows.filter(([l,v])=>(l&&l.trim())||(v&&v.trim())).map(([l,v])=>[l,v,!(v&&v.trim())]);
   const notes=S.bNt.split('\n').filter(Boolean);
   const tpl=S.bkTpl;
   let backRows='';
+  // ✨ 뒷면 개별 블록 오프셋 (제목 / 정보 / 안내)
+  const oTt=`transform:translate(${S.bTt_x||0}px, ${S.bTt_y||0}px);`;
+  const oInf=`transform:translate(${S.bInf_x||0}px, ${S.bInf_y||0}px);`;
+  const oNt=`transform:translate(${S.bNt_x||0}px, ${S.bNt_y||0}px);`;
+  
+  // ✨ 빈값 미출력: 이벤트명이 비어있으면 제목 행 전체 제거
+  const bttHtml=bttDisp.ph?'':`<div style="font-size:${tpl==='simple'?S.btSz*1.1:S.btSz}px;${bttStyleStr}">${bttDisp.t}</div>`;
   
   if(tpl==='simple'){
-    const stDisp=ph(S.bSt,'정보'),prDisp=ph(S.bPr,'가격');
-    backRows=`<div style="text-align:${align};padding:20px 8px;transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
-      <div style="font-family:${th.f1};font-size:${S.btSz*1.1}px;color:${bttDisp.ph?phColor:tx};">${bttDisp.t}</div>
-      <div style="font-family:${th.f2};font-size:${S.biSz+2}px;color:${stDisp.ph?phColor:tx};margin-top:12px;">${stDisp.t}</div>
-      <div style="font-family:${th.f2};font-size:${S.biSz+2}px;color:${prDisp.ph?phColor:ac};font-weight:700;margin-top:8px;">${prDisp.t}</div>
-      <div style="font-family:${th.f2};font-size:${S.cdSz}px;color:${bcdDisp.ph?phColor:sb};opacity:.6;margin-top:12px;">${bcdDisp.t}</div>
+    const stDisp=ph(S.bSt,''),prDisp=ph(S.bPr,'');
+    const stHtml=stDisp.ph?'':`<div style="font-family:${fontBody};font-size:${S.biSz+2}px;color:${colBody};margin-top:12px;">${stDisp.t}</div>`;
+    const prHtml=prDisp.ph?'':`<div style="font-family:${fontBody};font-size:${S.biSz+2}px;color:${ac};font-weight:700;margin-top:8px;">${prDisp.t}</div>`;
+    backRows=`<div style="text-align:${bAlign};padding:20px 8px;transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
+      ${bttHtml?`<div style="${oTt}">${bttHtml}</div>`:''}
+      ${(stHtml||prHtml)?`<div style="${oInf}">${stHtml}${prHtml}</div>`:''}
     </div>`;
   }else if(tpl==='card'){
-    backRows=`<div style="text-align:${align};padding:6px;transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
-      <div style="font-family:${th.f1};font-size:${S.btSz}px;color:${bttDisp.ph?phColor:tx};">${bttDisp.t}</div>
-      <div style="border-top:1px solid rgba(${hexRgb(ac)},.3);margin:4px 0;"></div>
-      ${rows.map(([l,v,e])=>`<div style="font-family:${th.f2};font-size:${S.biSz}px;color:${e?phColor:tx};margin:3px 0;">${esc(l)}: ${e?'값':esc(v)}</div>`).join('')}
-      ${notes.map(n=>`<div style="font-family:${th.f2};font-size:${S.bnSz}px;color:${sb};">${esc(n)}</div>`).join('')}
-      <div style="font-family:${th.f2};font-size:${S.cdSz}px;color:${bcdDisp.ph?phColor:sb};opacity:.6;margin-top:6px;">${bcdDisp.ph?'':'# '}${bcdDisp.t}</div>
+    backRows=`<div style="text-align:${bAlign};padding:6px;transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
+      ${bttHtml?`<div style="${oTt}">${bttHtml}<div style="border-top:1px solid rgba(${hexRgb(ac)},.3);margin:4px 0;"></div></div>`:''}
+      ${rows.length?`<div style="${oInf}">${rows.map(([l,v,e])=>`<div style="font-family:${fontBody};font-size:${S.biSz}px;color:${e?phColor:colBody};margin:3px 0;">${esc(l)}: ${e?'':esc(v)}</div>`).join('')}</div>`:''}
+      <div style="${oNt}">
+      ${notes.map(n=>`<div style="font-family:${fontBody};font-size:${S.bnSz}px;color:${colBody};">${esc(n)}</div>`).join('')}
+      </div>
     </div>`;
   }else{
     const isSplit=tpl==='split';
-    backRows=`<div style="padding:6px 10px;text-align:${align};transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
-      <div style="font-family:${th.f1};font-size:${S.btSz}px;color:${bttDisp.ph?phColor:tx};">${bttDisp.t}</div>
-      <div style="border-top:1px solid rgba(${hexRgb(ac)},.3);margin:3px 0;"></div>
+    backRows=`<div style="padding:6px 10px;text-align:${bAlign};transform:translate(${S.bTxOx||0}px, ${S.bTxOy||0}px);">
+      ${bttHtml?`<div style="${oTt}">${bttHtml}<div style="border-top:1px solid rgba(${hexRgb(ac)},.3);margin:3px 0;"></div></div>`:''}
       <div style="display:flex;gap:8px;${isSplit?'':'flex-direction:column;'}">
-        <div style="flex:1;text-align:${isSplit?'left':align};">
-          ${rows.map(([l,v,e])=>`<div style="margin:2px 0;"><span style="font-family:${th.f2};font-size:${S.bnSz}px;color:${sb};">${esc(l)}</span> <span style="font-family:${th.f2};font-size:${S.biSz}px;color:${e?phColor:tx};font-weight:500;">${e?'값':esc(v)}</span></div>`).join('')}
-        </div>
+        ${rows.length?`<div style="flex:1;text-align:${isSplit?'left':bAlign};${oInf}">${rows.map(([l,v,e])=>`<div style="margin:2px 0;"><span style="font-family:${fontBody};font-size:${S.biSz}px;color:${colSub};">${esc(l)}</span> <span style="font-family:${fontBody};font-size:${S.biSz}px;color:${e?phColor:colBody};font-weight:500;">${e?'':esc(v)}</span></div>`).join('')}</div>`:''}
         ${isSplit?`<div style="border-left:1px solid rgba(${hexRgb(ac)},.15);"></div>`:''}
-        <div style="${isSplit?'flex:1;text-align:left;':''}">
-          ${notes.length?notes.map(n=>`<div style="font-family:${th.f2};font-size:${S.bnSz}px;color:${sb};">• ${esc(n)}</div>`).join(''):`<div style="font-family:${th.f2};font-size:${S.bnSz}px;color:${phColor};">• 안내사항</div>`}
-          <div style="font-family:${th.f2};font-size:${S.cdSz}px;color:${bcdDisp.ph?phColor:sb};opacity:.6;margin-top:4px;">${bcdDisp.ph?'':'# '}${bcdDisp.t}</div>
+        <div style="${isSplit?'flex:1;text-align:left;':''}${oNt}">
+          ${notes.map(n=>`<div style="font-family:${fontBody};font-size:${S.bnSz}px;color:${colBody};">• ${esc(n)}</div>`).join('')}
         </div>
       </div>
     </div>`;
   }
 
-  let backContent=`<div style="position:relative;z-index:2;${innerBorder}height:100%;">${bImgHtml}${backRows}</div>`;
+  // ✨ 뒷면: 음수마진으로 이미지와 텍스트 겹치기 (position:absolute 제거 → 블로그 호환)
+  // 뒷면 이미지 좌/우 시 콘텐츠 자동 회피 (앞면과 동일)
+  const bContentML=bImg&&S.bIP==='left'?Math.floor(mainH*.7)+12:0;
+  const bContentMR=bImg&&S.bIP==='right'?Math.floor(mainH*.65)+12:0;
+  const backBorder=S.decBorder?`border:1px solid rgba(${hexRgb(ac)},.25);border-radius:${S.edge==='round'?'10px':S.edge==='roundXL'?'26px':'0'};`:'';
+  const bPadLeft=8+bContentML, bPadRight=8+bContentMR;
+  let backContent=`
+    ${bImgHtml?`<div style="position:relative;width:${mainW}px;height:${mainH}px;overflow:hidden;">${bImgHtml}</div>`:''}
+    <div style="position:relative;z-index:2;width:${mainW}px;height:${mainH}px;${bImgHtml?'margin-top:-'+mainH+'px;':''}box-sizing:border-box;padding:8px ${bPadRight}px 8px ${bPadLeft}px;">
+      <div style="${backBorder}width:100%;height:100%;box-sizing:border-box;">${backRows}</div>
+    </div>`;
 
+  // ✨ 스텁: 바코드텍스트/번호 on/off + 가로형일 때 텍스트 90도 회전
   const bcTxDisp=ph(S.bcTx,'ADMIT ONE');
   const stubCdDisp=ph(S.bCd,'TK-0000-00000');
-  const stubContent=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px;gap:2px;">
-    ${barcodeSvg}
-    <div style="font-family:${th.f2};font-size:${S.bcSz}px;color:${bcTxDisp.ph?phColor:sb};text-align:center;">${bcTxDisp.t}</div>
-    <div style="font-family:${th.f2};font-size:${S.cdSz}px;color:${stubCdDisp.ph?phColor:sb};opacity:.75;text-align:center;">${stubCdDisp.t}</div>
-  </div>`;
+  const stubTxtShow=S.showBcTx&&!bcTxDisp.ph;
+  const stubCdShow=S.showBcCd&&!stubCdDisp.ph;
+  const stubTxt=stubTxtShow?`<span style="font-family:${th.f2};font-size:${S.bcSz}px;color:${sb};">${bcTxDisp.t}</span>`:'';
+  const stubCd=stubCdShow?`<span style="font-family:${th.f2};font-size:${S.cdSz}px;color:${sb};opacity:.75;">${stubCdDisp.t}</span>`:'';
+  const stubTextBlock=(stubTxt||stubCd)?(S.stubLayout==='one'
+    ? `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;text-align:center;">${stubTxt}${stubCd}</div>`
+    : `${stubTxt?'<div style="text-align:center;">'+stubTxt+'</div>':''}${stubCd?'<div style="text-align:center;">'+stubCd+'</div>':''}`):'';
+  // 가로형: 바코드 왼쪽, 텍스트 오른쪽 90도 회전
+  const stubContent=isL
+    ?`<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;height:100%;padding:4px;gap:4px;">
+        ${barcodeSvg}
+        ${stubTextBlock?`<div style="writing-mode:vertical-rl;text-orientation:mixed;display:flex;flex-direction:column;align-items:center;gap:2px;">${stubTxt}${stubCd}</div>`:''}
+      </div>`
+    :`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px;gap:2px;">
+        ${barcodeSvg}
+        ${stubTextBlock}
+      </div>`;
 
   const mainContent=side==='front'?frontContent:backContent;
-  const outerStyle=`display:inline-flex;flex-direction:${isL?'row':'column'};width:${W}px;height:${H}px;background:${bgCss};${stripStyle}${clip!=='none'?`clip-path:${clip};-webkit-clip-path:${clip};`:''}`;
+  const outerStyle=`box-sizing:border-box;display:inline-flex;flex-direction:${isL?'row':'column'};width:${W}px;height:${H}px;background:${bgCss};${stripStyle}${clip!=='none'?`clip-path:${clip};-webkit-clip-path:${clip};`:''}`;
 
   return`<div style="${outerStyle}">
-    <div style="position:relative;flex:1;overflow:hidden;">${mainContent}</div>
-    <div style="width:0;height:0;${perfStyle}"></div>
-    <div style="${isL?`width:${stub}px;`:`height:${stub}px;`}overflow:hidden;">${stubContent}</div>
+    <div style="position:relative;width:${adjMainW}px;height:${adjMainH}px;flex:none;overflow:hidden;">${mainContent}</div>
+    <div style="${isL?`width:${stub}px;height:${adjMainH}px;`:`height:${stub}px;width:${adjMainW}px;`}flex:none;overflow:hidden;">${stubContent}</div>
   </div>`;
 }
 
@@ -495,26 +655,62 @@ function ph(val,hint){return val&&val.trim()?{t:esc(val),ph:false}:{t:esc(hint),
 function hexRgb(h){if(!h||h.length<7)return'0,0,0';return`${parseInt(h.slice(1,3),16)},${parseInt(h.slice(3,5),16)},${parseInt(h.slice(5,7),16)}`;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function render(){document.getElementById('cv').innerHTML=buildTicket(S.side);}
+function render(){
+  const cv=document.getElementById('cv');
+  cv.innerHTML='<div class="pc-inner">'+buildTicket(S.side)+'</div>';
+  fitPreview();
+}
+// 미리보기 영역에 맞춰 티켓 자동 축소 (모바일/작은 화면 잘림 방지). 확대는 안 함(최대 1배)
+function fitPreview(){
+  const cv=document.getElementById('cv');
+  const inner=cv.querySelector('.pc-inner');
+  if(!inner)return;
+  const ticket=inner.firstElementChild;
+  if(!ticket)return;
+  ticket.style.transform='';
+  inner.style.transform='';
+  // 가용 영역 (padding 제외)
+  const cs=getComputedStyle(cv);
+  const padX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight);
+  const padY=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom);
+  const availW=cv.clientWidth-padX-2;
+  const availH=cv.clientHeight-padY-2;
+  const tw=ticket.offsetWidth, th=ticket.offsetHeight;
+  if(tw<=0||th<=0)return;
+  const scale=Math.min(1, availW/tw, availH/th);
+  if(scale<1){
+    ticket.style.transformOrigin='center center';
+    ticket.style.transform='scale('+scale+')';
+    // 축소 후 실제 점유 크기로 래퍼 정리 (스크롤 영역 정확히)
+    inner.style.width=(tw*scale)+'px';
+    inner.style.height=(th*scale)+'px';
+  }else{
+    inner.style.width='';
+    inner.style.height='';
+  }
+}
+window.addEventListener('resize', fitPreview);
 
 // ══ UI BINDINGS ══
 document.querySelectorAll('.tb button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tb button').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelector(`.pg[data-t="${b.dataset.t}"]`).classList.add('on');}));
 document.querySelectorAll('.pt').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.pt').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.side=b.dataset.s;render();}));
-['fnT','fnS'].forEach(id=>{const s=document.getElementById(id);FN.forEach(([v,n])=>{const o=document.createElement('option');o.value=v;o.textContent=n;s.appendChild(o);});});
+['fnT','fnS','fnB','bFnTitle','bFnSub','bFnBody','bFnTitleInline'].forEach(id=>{const s=document.getElementById(id);if(!s)return;FN.forEach(([v,n])=>{const o=document.createElement('option');o.value=v;o.textContent=n;s.appendChild(o);});});
 
 const tgE=document.getElementById('tGrid');
-TH.forEach(t=>{const d=document.createElement('div');d.className='tc'+(t.id===S.theme?' on':'');d.dataset.id=t.id;d.style.cssText=`background:${t.bg};color:${t.tx};border-color:${t.id===S.theme?t.ac:t.bd}`;d.textContent=t.n;d.addEventListener('click',()=>{S.theme=t.id;S.cBg=t.bg;S.cAc=t.ac;S.cTx=t.tx;S.cSb=t.sb;['cBg','cAc','cTx','cSb'].forEach(k=>document.getElementById(k).value=S[k]);tgE.querySelectorAll('.tc').forEach(c=>{c.classList.toggle('on',c.dataset.id===t.id);c.style.borderColor=c.dataset.id===t.id?TH.find(x=>x.id===c.dataset.id).ac:TH.find(x=>x.id===c.dataset.id).bd;});render();});tgE.appendChild(d);});
+TH.forEach(t=>{const d=document.createElement('div');d.className='tc'+(t.id===S.theme?' on':'');d.dataset.id=t.id;d.style.cssText=`background:${t.bg};color:${t.tx};border-color:${t.id===S.theme?t.ac:t.bd}`;d.textContent=t.n;d.addEventListener('click',()=>{S.theme=t.id;S.cBg=t.bg;S.cAc=t.ac;S.cTx=t.tx;S.cSb=t.sb;S.cTitle=t.tx;S.cSub=t.sb;S.cBody=t.sb;['cBg','cAc','cTitle','cSub','cBody'].forEach(k=>{const el=document.getElementById(k);if(el)el.value=S[k];});tgE.querySelectorAll('.tc').forEach(c=>{c.classList.toggle('on',c.dataset.id===t.id);c.style.borderColor=c.dataset.id===t.id?TH.find(x=>x.id===c.dataset.id).ac:TH.find(x=>x.id===c.dataset.id).bd;});render();});tgE.appendChild(d);});
 
 function epP(id){const W=32,H=14;if(id==='straight')return`M0,0H${W}V${H}H0Z`;if(id==='round')return`M3,0H${W-3}Q${W},0,${W},3V${H-3}Q${W},${H},${W-3},${H}H3Q0,${H},0,${H-3}V3Q0,0,3,0Z`;if(id==='roundXL')return`M7,0H${W-7}Q${W},0,${W},7V${H-7}Q${W},${H},${W-7},${H}H7Q0,${H},0,${H-7}V7Q0,0,7,0Z`;const n={waveS:4,waveL:3,zigS:5,zigL:3,scallop:4,stamp:4}[id]||4;const a={waveS:2,waveL:3,zigS:2,zigL:3,scallop:2,stamp:2}[id]||2;const s=H/n;if(id.startsWith('wave')){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`C${W+a},${i*s},${W+a},${(i+1)*s},${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`C${-a},${i*s},${-a},${(i-1)*s},0,${(i-1)*s} `;return d+'Z';}if(id.startsWith('zig')){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`L${W-a},${i*s+s/2}L${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`L${a},${(i-1)*s+s/2}L0,${(i-1)*s} `;return d+'Z';}if(id==='scallop'){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`A${a},${a},0,0,0,${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`A${a},${a},0,0,0,0,${(i-1)*s} `;return d+'Z';}if(id==='stamp'){let d=`M0,0H${W} `;for(let i=0;i<n;i++)d+=`A${a},${a},0,0,1,${W},${(i+1)*s} `;d+=`H0 `;for(let i=n;i>0;i--)d+=`A${a},${a},0,0,1,0,${(i-1)*s} `;return d+'Z';}return`M0,0H${W}V${H}H0Z`;}
 const egE=document.getElementById('eGrid');EDS.forEach(e=>{const d=document.createElement('div');d.className='ec'+(e.id===S.edge?' on':'');d.dataset.v=e.id;d.innerHTML=`<svg width="32" height="14" viewBox="0 0 32 14"><path d="${epP(e.id)}" fill="none" stroke="currentColor" stroke-width="1"/></svg><span>${e.n}</span>`;d.addEventListener('click',()=>{S.edge=e.id;egE.querySelectorAll('.ec').forEach(c=>c.classList.toggle('on',c.dataset.v===e.id));render();});egE.appendChild(d);});
 
-function ipI(id){const s=16,r=`<rect width="${s}" height="${s}" rx="1" fill="none" stroke="currentColor" stroke-width=".6" opacity=".3"/>`;const m={none:'',left:`<rect x="1" y="1" width="4" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,right:`<rect x="${s-5}" y="1" width="4" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,top:`<rect x="1" y="1" width="${s-2}" height="4" rx=".5" fill="currentColor" opacity=".4"/>`,bottom:`<rect x="1" y="${s-5}" width="${s-2}" height="4" rx=".5" fill="currentColor" opacity=".4"/>`,bg:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".1"/>`,center:`<circle cx="${s/2}" cy="${s/2}" r="3.5" fill="currentColor" opacity=".3"/>`,full:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".3"/>`};return`<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">${r}${m[id]||''}</svg>`;}
-const fIPGE=document.getElementById('fIPG');IPS.forEach(p=>{const d=document.createElement('div');d.className='ip'+(p.id===S.fIP?' on':'');d.dataset.v=p.id;d.innerHTML=ipI(p.id)+`<span>${p.n}</span>`;d.addEventListener('click',()=>{S.fIP=p.id;fIPGE.querySelectorAll('.ip').forEach(c=>c.classList.toggle('on',c.dataset.v===p.id));render();});fIPGE.appendChild(d);});
+function ipI(id){const s=16,r=`<rect width="${s}" height="${s}" rx="1" fill="none" stroke="currentColor" stroke-width=".6" opacity=".3"/>`;const m={none:'',left:`<rect x="1" y="1" width="4" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,right:`<rect x="${s-5}" y="1" width="4" height="${s-2}" rx=".5" fill="currentColor" opacity=".4"/>`,top:`<rect x="1" y="1" width="${s-2}" height="4" rx=".5" fill="currentColor" opacity=".4"/>`,bottom:`<rect x="1" y="${s-5}" width="${s-2}" height="4" rx=".5" fill="currentColor" opacity=".4"/>`,bg:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".1"/>`,center:`<circle cx="${s/2}" cy="${s/2}" r="3.5" fill="currentColor" opacity=".3"/>`,full:`<rect x="1" y="1" width="${s-2}" height="${s-2}" rx=".5" fill="currentColor" opacity=".3"/>`,custom:`<rect x="3" y="4" width="7" height="6" rx="1.5" fill="currentColor" opacity=".4"/><path d="M11,11 l3,3 M13,11 h1.5 v1.5" stroke="currentColor" stroke-width=".8" fill="none" opacity=".5"/>`};return`<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">${r}${m[id]||''}</svg>`;}
+const fIPGE=document.getElementById('fIPG');IPS.forEach(p=>{const d=document.createElement('div');d.className='ip'+(p.id===S.fIP?' on':'');d.dataset.v=p.id;d.innerHTML=ipI(p.id)+`<span>${p.n}</span>`;d.addEventListener('click',()=>{S.fIP=p.id;fIPGE.querySelectorAll('.ip').forEach(c=>c.classList.toggle('on',c.dataset.v===p.id));document.getElementById('fCustom').style.display=p.id==='custom'?'block':'none';render();});fIPGE.appendChild(d);});
 
 document.querySelectorAll('#bkTpl .btc').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#bkTpl .btc').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.bkTpl=b.dataset.v;render();}));
 
 function sg(id,k,cb){document.getElementById(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[k]=b.dataset.v;if(cb)cb();render();}));}
-sg('sgAlign', 'tAl');
+sg('sgFAlign', 'fAl');
+sg('sgBAlign', 'bAl');
+sg('sgStubLayout', 'stubLayout');
 sg('sgO','orient',()=>{if(S.orient==='landscape'){S.tW=500;S.tH=210;S.tS=130;}else{S.tW=220;S.tH=380;S.tS=110;}document.getElementById('tW').value=S.tW;document.getElementById('tH').value=S.tH;document.getElementById('tS').value=S.tS;});
 sg('sgBC','bcSt',()=>{document.getElementById('bdRow').style.display=S.bcSt==='barcode'?'':'none';});
 
@@ -522,21 +718,36 @@ document.getElementById('sgSP').querySelectorAll('button').forEach(b=>b.addEvent
 
 // ✨ 세 덩어리 오프셋 (fT_x, fT_y, fS_x, fS_y, fD_x, fD_y) 실시간 이벤트 연결 완료!
 ['fT','fSb','fDt','fVn','bTt','bSt','bPr','bNt','bCd','bcTx','fIU','bIU','bL1','bL2','bL3','bL4','bV2','bV3'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
-['tsz','ssz','dSz','vSz','btSz','biSz','bnSz','cdSz','bcSz','tW','tH','tS','stW','fIOx','fIOy','bIOx','bIOy','fT_x','fT_y','fS_x','fS_y','fD_x','fD_y','bTxOx','bTxOy'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value)||0;render();}));
-['cBg','cAc','cTx','cSb','bgGrad2','titleGrad2','fFdCol','bFdCol'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=e.target.value;render();}));
-['fnT','fnS'].forEach(id=>document.getElementById(id).addEventListener('change',e=>{S[id]=e.target.value;render();}));
+['tsz','ssz','dSz','vSz','btSz','biSz','bnSz','cdSz','bcSz','tW','tH','tS','stW'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{S[id]=parseFloat(e.target.value)||0;render();}));
+// ✨ 슬라이더(id_r) ↔ 숫자(id) 양방향 동기화
+function syncPair(id){
+  const num=document.getElementById(id), rng=document.getElementById(id+'_r');
+  if(!num)return;
+  const apply=v=>{S[id]=parseFloat(v)||0;if(num)num.value=S[id];if(rng)rng.value=S[id];render();};
+  num.addEventListener('input',e=>apply(e.target.value));
+  if(rng)rng.addEventListener('input',e=>apply(e.target.value));
+}
+['fT_x','fT_y','fS_x','fS_y','fD_x','fD_y','bTxOx','bTxOy','bTt_x','bTt_y','bInf_x','bInf_y','bNt_x','bNt_y','fIOx','fIOy','bIOx','bIOy','fIcW','fIcH','fIcRx','fIcRy','bIcW','bIcH','bIcRx','bIcRy','fIfx','fIfy','bIfx','bIfy'].forEach(syncPair);
+['cBg','cAc','cTitle','cSub','cBody','bcTitle','bcSub','bcBody','bgGrad2','titleGrad2','bttGrad2','fFdCol','bFdCol'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',e=>{S[id]=e.target.value;render();});});
+['fnT','fnS','fnB','bFnTitle','bFnSub','bFnBody','bFnTitleInline'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',e=>{S[id]=e.target.value;if(id==='bFnTitleInline'){S.fnT=e.target.value;}render();});});
 document.getElementById('stOn').addEventListener('change',e=>{S.stOn=e.target.checked;render();});
 document.getElementById('bDen').addEventListener('input',e=>{S.bDen=parseInt(e.target.value);document.getElementById('dVal').textContent=S.bDen;render();});
 document.querySelectorAll('.sb2').forEach(b=>b.addEventListener('click',()=>{const m={tB:'tB',tI:'tI',tU:'tU',tS:'tS2'};const k=m[b.dataset.f]||b.dataset.f;S[k]=!S[k];b.classList.toggle('on',S[k]);render();}));
 document.getElementById('fIOp').addEventListener('input',e=>{S.fIOp=parseInt(e.target.value);document.getElementById('fIOpV').textContent=S.fIOp+'%';render();});
 document.getElementById('bIOp').addEventListener('input',e=>{S.bIOp=parseInt(e.target.value);document.getElementById('bIOpV').textContent=S.bIOp+'%';render();});
 document.getElementById('fIRd').addEventListener('input',e=>{S.fIRd=parseInt(e.target.value);document.getElementById('fIRdV').textContent=S.fIRd;render();});
+document.getElementById('bIRd').addEventListener('input',e=>{S.bIRd=parseInt(e.target.value);document.getElementById('bIRdV').textContent=S.bIRd;render();});
 document.getElementById('decDots').addEventListener('change',e=>{S.decDots=e.target.checked;render();});
 document.getElementById('decBorder').addEventListener('change',e=>{S.decBorder=e.target.checked;render();});
 document.getElementById('bgGrad').addEventListener('change',e=>{S.bgGrad=e.target.checked;document.getElementById('bgGradOpts').style.display=S.bgGrad?'block':'none';render();});
 sg('sgBgGDir','bgGradDir');
 document.getElementById('titleGrad').addEventListener('change',e=>{S.titleGrad=e.target.checked;document.getElementById('titleGradOpts').style.display=S.titleGrad?'block':'none';render();});
 sg('sgTGDir','titleGradDir');
+// ✨ 뒷면 폰트·색상 분리 토글
+document.getElementById('bkOverride').addEventListener('change',e=>{S.bkOverride=e.target.checked;document.getElementById('bkOverrideOpts').style.display=S.bkOverride?'block':'none';render();});
+// ✨ 뒷면 이벤트 제목 그라데이션
+document.getElementById('bttGrad').addEventListener('change',e=>{S.bttGrad=e.target.checked;document.getElementById('bttGradOpts').style.display=S.bttGrad?'block':'none';render();});
+sg('sgBttGDir','bttGradDir');
 document.getElementById('fFdOn').addEventListener('change',e=>{S.fFdOn=e.target.checked;document.getElementById('fFdOpts').style.display=S.fFdOn?'block':'none';render();});
 document.getElementById('fFdR').addEventListener('input',e=>{S.fFdR=parseInt(e.target.value);document.getElementById('fFdRV').textContent=S.fFdR;render();});
 document.getElementById('fFdTr').addEventListener('change',e=>{S.fFdTr=e.target.checked;render();});
@@ -544,7 +755,7 @@ document.getElementById('bFdOn').addEventListener('change',e=>{S.bFdOn=e.target.
 document.getElementById('bFdR').addEventListener('input',e=>{S.bFdR=parseInt(e.target.value);document.getElementById('bFdRV').textContent=S.bFdR;render();});
 document.getElementById('bFdTr').addEventListener('change',e=>{S.bFdTr=e.target.checked;render();});
 ['fFdDir','bFdDir'].forEach(id=>{document.getElementById(id).querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');S[id]=b.dataset.v;render();}));});
-const bIPGE=document.getElementById('bIPG');IPS.forEach(p=>{const d=document.createElement('div');d.className='ip'+(p.id===S.bIP?' on':'');d.dataset.v=p.id;d.innerHTML=ipI(p.id)+`<span>${p.n}</span>`;d.addEventListener('click',()=>{S.bIP=p.id;bIPGE.querySelectorAll('.ip').forEach(c=>c.classList.toggle('on',c.dataset.v===p.id));render();});bIPGE.appendChild(d);});
+const bIPGE=document.getElementById('bIPG');IPS.forEach(p=>{const d=document.createElement('div');d.className='ip'+(p.id===S.bIP?' on':'');d.dataset.v=p.id;d.innerHTML=ipI(p.id)+`<span>${p.n}</span>`;d.addEventListener('click',()=>{S.bIP=p.id;bIPGE.querySelectorAll('.ip').forEach(c=>c.classList.toggle('on',c.dataset.v===p.id));document.getElementById('bCustom').style.display=p.id==='custom'?'block':'none';render();});bIPGE.appendChild(d);});
 const bIF2=document.getElementById('bIF'),bIU2=document.getElementById('bIU'),bITh2=document.getElementById('bITh'),bICl2=document.getElementById('bICl');
 bIF2.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.bID=ev.target.result;S.bIU='';bIU2.value='';bITh2.src=S.bID;bITh2.style.display='block';bICl2.style.display='block';render();};r.readAsDataURL(f);});
 bIU2.addEventListener('input',e=>{S.bIU=e.target.value;S.bID='';bIF2.value='';if(S.bIU){bITh2.src=S.bIU;bITh2.style.display='block';bICl2.style.display='block';}else{bITh2.style.display='none';bICl2.style.display='none';}render();});
@@ -553,8 +764,29 @@ const fIF=document.getElementById('fIF'),fIU=document.getElementById('fIU'),fITh
 fIF.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{S.fID=ev.target.result;S.fIU='';fIU.value='';fITh.src=S.fID;fITh.style.display='block';fICl.style.display='block';render();};r.readAsDataURL(f);});
 fIU.addEventListener('input',e=>{S.fIU=e.target.value;S.fID='';fIF.value='';if(S.fIU){fITh.src=S.fIU;fITh.style.display='block';fICl.style.display='block';}else{fITh.style.display='none';fICl.style.display='none';}render();});
 fICl.addEventListener('click',()=>{S.fID='';S.fIU='';fIU.value='';fIF.value='';fITh.style.display='none';fICl.style.display='none';render();});
-document.getElementById('sgMode').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById('sgMode').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.body.classList.toggle('dark',b.dataset.v==='dark');}));
-document.getElementById('sgBg').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{document.getElementById('sgBg').querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');const r=document.documentElement.style;const m={cl:['#e8e4dc','#f2efea'],cd:['#2a2a30','#222226'],w:['#fff','#fff'],b:['#111','#111']};const[a,b2]=m[b.dataset.v]||m.cl;r.setProperty('--ckA',a);r.setProperty('--ckB',b2);}));
+// ✨ 밝기 토글 (아이콘 버튼)
+let isDark=false;
+document.getElementById('btnMode').addEventListener('click',()=>{isDark=!isDark;document.body.classList.toggle('dark',isDark);document.getElementById('btnMode').textContent=isDark?'☀️':'🌙';});
+// ✨ showBcTx/showBcCd 토글
+document.getElementById('showBcTx').addEventListener('change',e=>{S.showBcTx=e.target.checked;render();});
+document.getElementById('showBcCd').addEventListener('change',e=>{S.showBcCd=e.target.checked;render();});
+// ✨ BIUS 부제목(sB/sI/sU/sS2) + 이벤트명(bttB/bttI/bttU/bttS2)
+document.querySelectorAll('.sb2[data-f]').forEach(b=>{
+  const k=b.dataset.f;
+  // tS→tS2, sS→sS2, bttS→bttS2 매핑
+  const sk=k==='tS'?'tS2':k==='sS'?'sS2':k==='bttS'?'bttS2':k;
+  if(S[sk]!==undefined) b.classList.toggle('on',S[sk]);
+  b.addEventListener('click',()=>{S[sk]=!S[sk];b.classList.toggle('on',S[sk]);render();});
+});
+// ✨ 이미지 조정 UI: 이미지가 있을 때만 표시
+function updateImgOpts(){
+  const fHas=!!(S.fID||S.fIU); const bHas=!!(S.bID||S.bIU);
+  const fe=document.getElementById('fImgOpts'); if(fe)fe.style.display=fHas?'block':'none';
+  const be=document.getElementById('bImgOpts'); if(be)be.style.display=bHas?'block':'none';
+}
+// 이미지 업로드/URL 변경 시 조건부 UI 갱신
+const origRender=render;
+render=function(){origRender();updateImgOpts();};
 
 // ══ DOWNLOADS ══
 const fontImports=`@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');@import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap');@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Noto+Serif+KR:wght@700&display=swap');@font-face{font-family:'Ridibatang';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff') format('woff');}@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFLightA.woff') format('woff');font-weight:300;}@font-face{font-family:'GangwonEduModu';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFBoldA.woff') format('woff');font-weight:700;}@font-face{font-family:'OngleipParkDahyeon';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');}`;
@@ -588,35 +820,133 @@ document.getElementById('cpBlog').addEventListener('click', () => {
   const target = document.getElementById('expTarget').value;
   const content = getTargetHTML(target);
   const html = `<style>${fontImports}</style><div style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:16px;">${content}</div>`;
-  
-  navigator.clipboard.writeText(html).then(() => {
-    const btn = document.getElementById('cpBlog');
-    btn.textContent = '✅';
-    setTimeout(() => btn.textContent = '📝블로그복사', 1500);
-  });
+  const btn = document.getElementById('cpBlog');
+  const ok = () => { btn.textContent = '✅ 복사됨'; setTimeout(() => btn.textContent = '📝블로그복사', 1500); };
+  const fail = () => {
+    // 폴백: 숨은 textarea + execCommand (모바일/구형/비-HTTPS 대응)
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = html;
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select(); ta.setSelectionRange(0, html.length);
+      const done = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (done) { ok(); }
+      else { btn.textContent = '⚠️ 복사 실패'; setTimeout(() => btn.textContent = '📝블로그복사', 2000); alert('자동 복사가 차단됐습니다. HTML저장 버튼으로 파일을 받아 사용해주세요.'); }
+    } catch (e) {
+      btn.textContent = '⚠️ 실패'; setTimeout(() => btn.textContent = '📝블로그복사', 2000);
+      alert('이 브라우저에서는 자동 복사가 지원되지 않습니다. HTML저장 버튼을 이용해주세요.');
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(html).then(ok).catch(fail);
+  } else {
+    fail();
+  }
 });
+
+// URL 이미지를 base64 dataURL로 변환 (CORS 허용 서버 한정). 실패 시 null
+function urlToDataURL(url) {
+  if (/^data:/.test(url)) return Promise.resolve(url);
+  return fetch(url, { mode: 'cors' })
+    .then(r => { if (!r.ok) throw new Error('http'); return r.blob(); })
+    .then(blob => new Promise((res, rej) => {
+      const fr = new FileReader();
+      fr.onload = () => res(fr.result);
+      fr.onerror = rej;
+      fr.readAsDataURL(blob);
+    }))
+    .catch(() => null);
+}
 
 function dP(side) {
   const el = document.createElement('div');
   el.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
   el.innerHTML = buildTicket(side);
   document.body.appendChild(el);
-  
   const ticket = el.firstElementChild;
-  
-  html2canvas(ticket, {
-    backgroundColor: null,
-    scale: 3,
-    useCORS: true
-  }).then(canvas => {
-    canvas.toBlob(blob => {
-      dl(`ticket-${side}.png`, blob);
+
+  // ✨ background 단축 속성에서도 URL 추출 (기존 backgroundImage만 봤던 버그 수정)
+  const nodes = [];
+  el.querySelectorAll('*').forEach(node => {
+    const st = node.getAttribute('style') || '';
+    const m = st.match(/background\s*:\s*url\(['"]?(.*?)['"]?\)/);
+    if (m && m[1]) nodes.push({ node, url: m[1] });
+  });
+
+  const jobs = nodes.map(({ node, url }) =>
+    urlToDataURL(url).then(dataUrl => {
+      if (dataUrl) {
+        // background 단축속성에서 url(...) 부분만 교체
+        const st = node.getAttribute('style');
+        node.setAttribute('style', st.replace(/url\(['"]?.*?['"]?\)/, `url('${dataUrl}')`));
+        return true;
+      }
+      return false;
+    })
+  );
+
+  // ✨ clip-path를 기억하고 캡처 전에 제거 (html2canvas가 지원 안 함)
+  const clipVal = ticket.style.clipPath || ticket.style.webkitClipPath || '';
+  if (clipVal) {
+    ticket.style.clipPath = 'none';
+    ticket.style.webkitClipPath = 'none';
+  }
+
+  Promise.all(jobs).then(results => {
+    const anyFailed = results.some(r => r === false);
+    html2canvas(ticket, {
+      backgroundColor: null,
+      scale: 3,
+      useCORS: true,
+      allowTaint: false,
+      imageTimeout: 8000,
+      logging: false
+    }).then(canvas => {
+      let finalCanvas = canvas;
+      // ✨ clip-path가 있었으면 canvas에 직접 적용
+      if (clipVal && clipVal !== 'none') {
+        finalCanvas = document.createElement('canvas');
+        finalCanvas.width = canvas.width;
+        finalCanvas.height = canvas.height;
+        const ctx = finalCanvas.getContext('2d');
+        const sx = canvas.width / ticket.offsetWidth;
+        const sy = canvas.height / ticket.offsetHeight;
+        ctx.save();
+        // clip-path 파싱 및 적용
+        const insetM = clipVal.match(/inset\(0[^)]*round\s+(\d+)px\)/);
+        const polyM = clipVal.match(/polygon\(([^)]+)\)/);
+        if (insetM) {
+          const r = parseFloat(insetM[1]) * sx;
+          ctx.beginPath();
+          ctx.roundRect(0, 0, canvas.width, canvas.height, r);
+          ctx.clip();
+        } else if (polyM) {
+          const pts = polyM[1].split(',').map(p => {
+            const [xp, yp] = p.trim().split(/\s+/);
+            return [parseFloat(xp) / 100 * canvas.width, parseFloat(yp) / 100 * canvas.height];
+          });
+          ctx.beginPath();
+          pts.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
+          ctx.closePath();
+          ctx.clip();
+        }
+        ctx.drawImage(canvas, 0, 0);
+        ctx.restore();
+      }
+      finalCanvas.toBlob(blob => {
+        dl(`ticket-${side}.png`, blob);
+        document.body.removeChild(el);
+        if (anyFailed) {
+          alert('일부 이미지를 변환하지 못했습니다.\n해당 이미지 서버가 외부 접근(CORS)을 막은 경우이며, "파일 업로드" 방식으로 추가하면 확실히 저장됩니다.');
+        }
+      }, 'image/png');
+    }).catch(err => {
+      console.error('PNG 캡처 에러:', err);
       document.body.removeChild(el);
-    }, 'image/png');
-  }).catch(err => {
-    console.error('PNG 캡처 에러:', err);
-    alert('PNG 저장 중 오류가 발생했습니다.');
-    document.body.removeChild(el);
+      alert('PNG 저장 중 오류가 발생했습니다.');
+    });
   });
 }
 
