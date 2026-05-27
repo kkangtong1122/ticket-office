@@ -794,13 +794,17 @@ const fontImports=`@import url('https://fonts.googleapis.com/css2?family=Noto+Sa
 function getTargetHTML(target) {
   const f = buildTicket('front');
   const b = buildTicket('back');
+  // 각 티켓을 반응형 래퍼로: 화면이 좁으면 가로 스크롤 (잘림 방지, PC에서는 원본 그대로)
+  const respWrap = (label, inner) =>
+    `<div style="text-align:center;max-width:100%;margin:0 auto 1.5rem;">
+      <div style="font-size:11px;color:#888;margin-bottom:6px;">${label}</div>
+      <div style="max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;">
+        <div style="display:inline-block;">${inner}</div>
+      </div>
+    </div>`;
   let content = '';
-  if (target === 'all' || target === 'front') {
-    content += `<div style="text-align:center;"><div style="font-size:11px;color:#888;margin-bottom:6px;">앞면</div>${f}</div>`;
-  }
-  if (target === 'all' || target === 'back') {
-    content += `<div style="text-align:center;"><div style="font-size:11px;color:#888;margin-bottom:6px;">뒷면</div>${b}</div>`;
-  }
+  if (target === 'all' || target === 'front') content += respWrap(f);
+  if (target === 'all' || target === 'back') content += respWrap(b);
   return content;
 }
 
@@ -846,18 +850,62 @@ document.getElementById('cpBlog').addEventListener('click', () => {
   }
 });
 
-// URL 이미지를 base64 dataURL로 변환 (CORS 허용 서버 한정). 실패 시 null
+// URL 이미지를 base64 dataURL로 변환. 직접 fetch → 여러 프록시 → img+canvas 순으로 시도
+const _urlCache = {};
 function urlToDataURL(url) {
   if (/^data:/.test(url)) return Promise.resolve(url);
+  if (_urlCache[url]) return Promise.resolve(_urlCache[url]);
+  const cache = d => { if (d) _urlCache[url] = d; return d; };
+  const toData = blob => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(blob);
+  });
+  // img 태그로 로드 후 canvas로 추출 (프록시 경유 url 사용)
+  const viaImg = src => new Promise(res => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      try {
+        const cv = document.createElement('canvas');
+        cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+        cv.getContext('2d').drawImage(im, 0, 0);
+        res(cv.toDataURL('image/png'));
+      } catch (e) { res(null); }
+    };
+    im.onerror = () => res(null);
+    im.src = src;
+    setTimeout(() => res(null), 9000);
+  });
+  // 프록시 후보들 (이미지 바이트를 그대로 돌려주는 것들)
+  const proxies = [
+    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+    u => 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//, '')),
+    u => 'https://wsrv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//, ''))
+  ];
+  // 1차: 직접 fetch
   return fetch(url, { mode: 'cors' })
-    .then(r => { if (!r.ok) throw new Error('http'); return r.blob(); })
-    .then(blob => new Promise((res, rej) => {
-      const fr = new FileReader();
-      fr.onload = () => res(fr.result);
-      fr.onerror = rej;
-      fr.readAsDataURL(blob);
-    }))
-    .catch(() => null);
+    .then(r => { if (!r.ok) throw 0; return r.blob(); })
+    .then(toData)
+    .catch(() => {
+      // 2차: 프록시 fetch 순차 시도
+      const tryFetch = i => {
+        if (i >= proxies.length) return tryImg(0);
+        return fetch(proxies[i](url))
+          .then(r => { if (!r.ok) throw 0; return r.blob(); })
+          .then(toData)
+          .catch(() => tryFetch(i + 1));
+      };
+      // 3차: img+canvas (weserv는 CORS 허용 헤더를 줌)
+      const tryImg = i => {
+        if (i >= proxies.length) return null;
+        return viaImg(proxies[i](url)).then(d => d || tryImg(i + 1));
+      };
+      return tryFetch(0);
+    })
+    .then(cache);
 }
 
 function dP(side) {
@@ -867,20 +915,20 @@ function dP(side) {
   document.body.appendChild(el);
   const ticket = el.firstElementChild;
 
-  // ✨ background 단축 속성에서도 URL 추출 (기존 backgroundImage만 봤던 버그 수정)
+  // ✨ background 단축 속성에서 URL 추출 (backgroundImage 개별속성은 innerHTML DOM에서 빈 값이라 안됨)
   const nodes = [];
   el.querySelectorAll('*').forEach(node => {
     const st = node.getAttribute('style') || '';
-    const m = st.match(/background\s*:\s*url\(['"]?(.*?)['"]?\)/);
-    if (m && m[1]) nodes.push({ node, url: m[1] });
+    const m = st.match(/url\(\s*['"]?([^'")]+)['"]?\s*\)/);
+    if (m && m[1] && /^https?:\/\//.test(m[1])) nodes.push({ node, url: m[1] });
   });
 
   const jobs = nodes.map(({ node, url }) =>
     urlToDataURL(url).then(dataUrl => {
       if (dataUrl) {
-        // background 단축속성에서 url(...) 부분만 교체
         const st = node.getAttribute('style');
-        node.setAttribute('style', st.replace(/url\(['"]?.*?['"]?\)/, `url('${dataUrl}')`));
+        // url(...) 전체를 dataURL로 교체
+        node.setAttribute('style', st.replace(/url\(\s*['"]?[^'")]+['"]?\s*\)/, `url("${dataUrl}")`));
         return true;
       }
       return false;
@@ -896,25 +944,30 @@ function dP(side) {
 
   Promise.all(jobs).then(results => {
     const anyFailed = results.some(r => r === false);
+    // scale: 화질 4배, 큰 티켓은 상한(최대변 4000px)
+    const baseScale = 4;
+    const maxDim = 4000;
+    const longest = Math.max(ticket.offsetWidth, ticket.offsetHeight);
+    const scale = Math.min(baseScale, Math.max(2, maxDim / longest));
     html2canvas(ticket, {
       backgroundColor: null,
-      scale: 3,
+      scale: scale,
       useCORS: true,
       allowTaint: false,
       imageTimeout: 8000,
       logging: false
     }).then(canvas => {
       let finalCanvas = canvas;
-      // ✨ clip-path가 있었으면 canvas에 직접 적용
+      // ✨ clip-path가 있었으면 canvas에 직접 적용 (고품질 스무딩)
       if (clipVal && clipVal !== 'none') {
         finalCanvas = document.createElement('canvas');
         finalCanvas.width = canvas.width;
         finalCanvas.height = canvas.height;
         const ctx = finalCanvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         const sx = canvas.width / ticket.offsetWidth;
-        const sy = canvas.height / ticket.offsetHeight;
         ctx.save();
-        // clip-path 파싱 및 적용
         const insetM = clipVal.match(/inset\(0[^)]*round\s+(\d+)px\)/);
         const polyM = clipVal.match(/polygon\(([^)]+)\)/);
         if (insetM) {
@@ -952,11 +1005,19 @@ function dP(side) {
 
 document.getElementById('dPNG').addEventListener('click', () => {
   const target = document.getElementById('expTarget').value;
+  const btn = document.getElementById('dPNG');
+  const orig = btn.textContent;
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  const done = () => { btn.textContent = orig; btn.disabled = false; };
+  // 처리 완료 추정 시점에 버튼 복구 (이미지 변환·캡처 시간 고려)
   if (target === 'all') {
     dP('front');
-    setTimeout(() => dP('back'), 500);
+    setTimeout(() => dP('back'), 600);
+    setTimeout(done, 2500);
   } else {
     dP(target);
+    setTimeout(done, 1800);
   }
 });
 
