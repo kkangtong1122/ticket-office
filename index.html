@@ -803,8 +803,8 @@ function getTargetHTML(target) {
       </div>
     </div>`;
   let content = '';
-  if (target === 'all' || target === 'front') content += respWrap(f);
-  if (target === 'all' || target === 'back') content += respWrap(b);
+  if (target === 'all' || target === 'front') content += respWrap('',f);
+  if (target === 'all' || target === 'back') content += respWrap('',b);
   return content;
 }
 
