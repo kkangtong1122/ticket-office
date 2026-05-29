@@ -5,6 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>🎟 매표소</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// roundRect 폴리필 (구형 브라우저 대비)
+if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (typeof r === 'number') r = [r, r, r, r];
+    else if (Array.isArray(r) && r.length === 1) r = [r[0], r[0], r[0], r[0]];
+    else if (!Array.isArray(r)) r = [0,0,0,0];
+    const [tl, tr, br, bl] = r;
+    this.moveTo(x + tl, y);
+    this.lineTo(x + w - tr, y);
+    this.arcTo(x + w, y, x + w, y + tr, tr);
+    this.lineTo(x + w, y + h - br);
+    this.arcTo(x + w, y + h, x + w - br, y + h, br);
+    this.lineTo(x + bl, y + h);
+    this.arcTo(x, y + h, x, y + h - bl, bl);
+    this.lineTo(x, y + tl);
+    this.arcTo(x, y, x + tl, y, tl);
+    return this;
+  };
+}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap');
@@ -108,6 +129,16 @@ body.dark .adj>input[type=number]{background:#2a2a30;color:#e0e0e4;}
 
 <!-- ═══ 디자인 탭 ═══ -->
 <div class="pg on" data-t="design">
+<div><div class="sc">✨ 빠른 채우기 (텍스트만)</div>
+<div class="tg" id="tplGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;">
+<button class="tplBtn" data-tpl="concert" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🎤 콘서트</button>
+<button class="tplBtn" data-tpl="musical" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🎭 뮤지컬</button>
+<button class="tplBtn" data-tpl="movie" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🎬 영화</button>
+<button class="tplBtn" data-tpl="festival" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🎪 페스티벌</button>
+<button class="tplBtn" data-tpl="exhibition" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🖼️ 전시</button>
+<button class="tplBtn" data-tpl="random" style="padding:.35rem .2rem;font-size:.65rem;border:1px solid var(--bd);border-radius:6px;background:var(--pn);color:var(--tx);cursor:pointer;">🎲 랜덤</button>
+</div>
+<div style="font-size:.55rem;color:var(--mt);margin-top:3px;line-height:1.4;">버튼을 누를 때마다 새 조합으로 채워집니다. 빈 칸으로 두고 싶은 항목은 채워진 뒤 지워주세요.</div></div>
 <div><div class="sc">테마</div><div class="tg" id="tGrid"></div></div>
 <div><div class="sc">방향</div><div class="sg" id="sgO"><button class="on" data-v="landscape">가로형</button><button data-v="portrait">세로형</button></div></div>
 <div><div class="sc">모서리</div><div class="eg" id="eGrid"></div></div>
@@ -125,6 +156,9 @@ body.dark .adj>input[type=number]{background:#2a2a30;color:#e0e0e4;}
 <div id="bgGradOpts" style="display:none;margin-top:3px;">
 <div class="cr"><span>끝색상</span><input type="color" id="bgGrad2" value="#d4a830"></div>
 <div class="sg" id="sgBgGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button><button data-v="45deg">↗</button></div>
+<div style="margin-top:3px;"><div class="sc" style="margin-bottom:2px;">그라데이션 비율</div>
+<div class="adj"><span class="lab">시작%</span><input type="range" id="bgGradS_r" min="0" max="100" value="0"><input type="number" id="bgGradS" value="0" min="0" max="100" step="1"></div>
+<div class="adj"><span class="lab">끝%</span><input type="range" id="bgGradE_r" min="0" max="100" value="100"><input type="number" id="bgGradE" value="100" min="0" max="100" step="1"></div></div>
 </div></div>
 <div style="margin-top:3px;"><label class="tog"><input type="checkbox" id="bkOverride"><span class="t"></span>뒷면 색상·폰트 따로</label>
 <div id="bkOverrideOpts" style="display:none;margin-top:4px;">
@@ -175,6 +209,9 @@ body.dark .adj>input[type=number]{background:#2a2a30;color:#e0e0e4;}
 <div id="titleGradOpts" style="display:none;margin-top:2px;">
 <div class="cr"><span>끝색상</span><input type="color" id="titleGrad2" value="#d4a830"></div>
 <div class="sg" id="sgTGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button></div>
+<div style="margin-top:3px;"><div class="sc" style="margin-bottom:2px;">그라데이션 비율</div>
+<div class="adj"><span class="lab">시작%</span><input type="range" id="titleGradS_r" min="0" max="100" value="0"><input type="number" id="titleGradS" value="0" min="0" max="100" step="1"></div>
+<div class="adj"><span class="lab">끝%</span><input type="range" id="titleGradE_r" min="0" max="100" value="100"><input type="number" id="titleGradE" value="100" min="0" max="100" step="1"></div></div>
 </div></div></div>
 <div><div class="sc">부제목</div>
 <div class="f"><input type="text" id="fSb" placeholder="부제목"></div>
@@ -240,6 +277,9 @@ body.dark .adj>input[type=number]{background:#2a2a30;color:#e0e0e4;}
 <div id="bttGradOpts" style="display:none;margin-top:3px;">
 <div class="cr"><span>끝색상</span><input type="color" id="bttGrad2" value="#d4a830"></div>
 <div class="sg" id="sgBttGDir" style="margin-top:2px;"><button class="on" data-v="135deg">↘</button><button data-v="90deg">↓</button><button data-v="0deg">→</button><button data-v="45deg">↗</button></div>
+<div style="margin-top:3px;"><div class="sc" style="margin-bottom:2px;">그라데이션 비율</div>
+<div class="adj"><span class="lab">시작%</span><input type="range" id="bttGradS_r" min="0" max="100" value="0"><input type="number" id="bttGradS" value="0" min="0" max="100" step="1"></div>
+<div class="adj"><span class="lab">끝%</span><input type="range" id="bttGradE_r" min="0" max="100" value="100"><input type="number" id="bttGradE" value="100" min="0" max="100" step="1"></div></div>
 </div></div></div>
 <div><div class="sc">정보 (라벨 · 값)</div>
 <div class="rw" style="margin-bottom:2px;"><div class="f" style="width:50px;flex:none;"><input type="text" id="bL1" value="좌석" placeholder="라벨"></div><div class="f"><input type="text" id="bSt" placeholder="좌석 등 정보"></div><div class="sz"><input type="number" id="biSz" value="10" min="5" max="24"></div></div>
@@ -332,17 +372,17 @@ const EDS=[{id:'straight',n:'직선'},{id:'round',n:'둥글게'},{id:'roundXL',n
 // ✨ 텍스트 개별 오프셋 변수(fT_x, fT_y, fS_x, fS_y, fD_x, fD_y) 추가
 const S={theme:'retro',orient:'landscape',edge:'straight',side:'front',fIP:'none',bIP:'none',bkTpl:'default',
 cBg:'#f5f0e0',cAc:'#c8410a',cTx:'#2a1f10',cSb:'#8a6a40',
-bgGrad:false,bgGrad2:'#d4a830',bgGradDir:'135deg',
+bgGrad:false,bgGrad2:'#d4a830',bgGradDir:'135deg',bgGradS:0,bgGradE:100,
 tW:500,tH:210,tS:130, tAl:'center', fAl:'center', bAl:'center',
 stOn:true,stPos:['left'],stW:6,bcSt:'barcode',bDen:20,
 fT:'',fSb:'',fDt:'',fVn:'',
-titleGrad:false,titleGrad2:'#d4a830',titleGradDir:'135deg',
+titleGrad:false,titleGrad2:'#d4a830',titleGradDir:'135deg',titleGradS:0,titleGradE:100,
 bTt:'',bSt:'',bPr:'',bNt:'',bCd:'',bcTx:'',
 bL1:'좌석',bL2:'날짜',bL3:'장소',bL4:'가격',bV2:'',bV3:'',
 fnT:'',fnS:'',fnB:'',tsz:0,ssz:11,dSz:9,vSz:10,btSz:18,biSz:10,bnSz:8.5,cdSz:7,bcSz:7.5,
 cTitle:'#2a1f10',cSub:'#8a6a40',cBody:'#8a6a40',
 bkOverride:false, bFnTitle:'',bFnSub:'',bFnBody:'', bcTitle:'',bcSub:'',bcBody:'',
-bttGrad:false,bttGrad2:'#d4a830',bttGradDir:'135deg',
+bttGrad:false,bttGrad2:'#d4a830',bttGradDir:'135deg',bttGradS:0,bttGradE:100,
 fIfx:50,fIfy:50, bIfx:50,bIfy:50,
 tB:false,tI:false,tU:false,tS2:false,
 sB:false,sI:false,sU:false,sS2:false,
@@ -400,6 +440,14 @@ function clipPath(W,H,edge){
 }
 
 function buildTicket(side){
+  // ✨ 이미지 dataURL을 HTML 속성에 직접 박으면 깨지므로 레지스트리에 저장하고 ID로 참조
+  window.__imgReg = window.__imgReg || {};
+  const regImg = (src) => {
+    if (!src) return '';
+    const id = '__img_' + (Object.keys(window.__imgReg).length + 1) + '_' + Date.now();
+    window.__imgReg[id] = src;
+    return id;
+  };
   const th=gt();
   const W=Math.max(150,S.tW),H=Math.max(80,S.tH),stub=Math.max(40,Math.min(S.tS,Math.floor(W*.4)));
   const isL=S.orient==='landscape';
@@ -420,7 +468,7 @@ function buildTicket(side){
   const phColor='#bbb';
   let ts=S.tsz>0?S.tsz:Math.min(48,Math.max(14,isL?(mainW-80)/Math.max((S.fT||'제목').length,3)*1.4:(mainW-20)/Math.max((S.fT||'제목').length,3)*2));
   const ss=S.ssz||11;
-  const bgCss=S.bgGrad?`linear-gradient(${S.bgGradDir},${S.cBg},${S.bgGrad2})`:S.cBg;
+  const bgCss=S.bgGrad?`linear-gradient(${S.bgGradDir},${S.cBg} ${S.bgGradS||0}%,${S.bgGrad2} ${S.bgGradE||100}%)`:S.cBg;
   let stripStyle='';
   let stripOverlay='';
   let stripW={top:0,right:0,bottom:0,left:0};
@@ -463,7 +511,7 @@ function buildTicket(side){
     }
   }
 
-  const dotLine=S.decDots?`<div style="height:3px;background:repeating-linear-gradient(to right,rgba(${hexRgb(tx)},.3) 0 2px,transparent 2px 8px);margin:4px 0;"></div>`:'';
+  const dotLine=S.decDots?`<div class="__dotline" data-dotcol="${hexRgb(tx)}" style="height:3px;background:repeating-linear-gradient(to right,rgba(${hexRgb(tx)},.3) 0 2px,transparent 2px 8px);margin:4px 0;"></div>`:'';
 
   function imgDiv(imgSrc,pos,op,rd,ox,oy,fdOn,fdDir,fdR,fdCol,fdTr,mW2,mH2,cust){
     if(!imgSrc||pos==='none')return'';
@@ -480,25 +528,30 @@ function buildTicket(side){
       return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;background:linear-gradient(${d},transparent ${100-fdR}%,${fdCol} 100%);pointer-events:none;z-index:2;"></div>`;
     })():'';
     const fx=(cust&&cust.fx!=null)?cust.fx:50, fy=(cust&&cust.fy!=null)?cust.fy:50;
-    const pos2=`${fx}% ${fy}%`;
-    const base=`background:url('${imgSrc}') ${pos2}/cover no-repeat;opacity:${a};border-radius:${rd}px;${maskStyle}`;
-    const baseNoRd=`background:url('${imgSrc}') ${pos2}/cover no-repeat;opacity:${a};${maskStyle}`;
     const offX=ox||0, offY=oy||0;
-    // ✨ 커스텀 모드: X/Y 위치, %크기, 곡률(가로/세로 반경 독립)
+    // 화면 표시: background:url(...)/cover 사용 (외부 블로그 호환성 ↑, <img>는 블로그 에디터가 본문에서 분리해버림)
+    // PNG 저장: 후처리에서 data-imgid로 레지스트리에서 dataURL 가져와 캔버스에 직접 그림 (화질·찌그러짐·페이드 처리)
+    const pos2=`${fx}% ${fy}%`;
+    const baseBg=`background:url('${imgSrc}') ${pos2}/cover no-repeat;`;
+    // 캡처 후 캔버스 재현용 data 속성
+    const imgId = regImg(imgSrc);
+    const dataFor=(dm)=>`class="__tkimgwrap" data-imgid="${imgId}" data-fx="${fx}" data-fy="${fy}" data-op="${a}"`+(fdOn?` data-fm="${fdDir||'right'}" data-fr="${fdR||0}"`:'')+(dm?` data-dm="${dm}"`:'');
+    // 바깥 래퍼 div 공통: background로 이미지, 모서리/마스크/opacity는 div 스타일에
+    const wrap=(boxStyle,radiusStyle,z,dm)=>`<div ${dataFor(dm)} style="position:absolute;${boxStyle}${baseBg}opacity:${a};${radiusStyle||''}${maskStyle}z-index:${z};"></div>`;
+
     if(pos==='custom'){
       const c=cust||{w:50,h:50,rx:8,ry:8};
       const cw=Math.max(1,Math.round(mW2*(c.w/100)));
       const ch=Math.max(1,Math.round(mH2*(c.h/100)));
-      const radius=`border-radius:${c.rx}% / ${c.ry}%;`;
-      return`<div style="position:absolute;left:${offX}px;top:${offY}px;width:${cw}px;height:${ch}px;${baseNoRd}${radius}z-index:1;"></div>${fadeOverlay}`;
+      return wrap(`left:${offX}px;top:${offY}px;width:${cw}px;height:${ch}px;`,`border-radius:${c.rx}% / ${c.ry}%;`,1)+fadeOverlay;
     }
-    if(pos==='bg')return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div>${fadeOverlay}`;
-    if(pos==='full')return`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);${base}z-index:0;"></div><div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;background:${bg};opacity:.45;z-index:1;"></div>${fadeOverlay}`;
-    if(pos==='left'){const iw=Math.floor(mH2*.7);const ih=mH2-12;return`<div style="position:absolute;left:${6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;${base}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='right'){const iw=Math.floor(mH2*.65);const ih=mH2-12;return`<div style="position:absolute;left:${mW2-iw-6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;${base}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='top'){const ih=Math.floor(mH2*.45);const defMask=`mask-image:linear-gradient(to bottom,black 55%,transparent);-webkit-mask-image:linear-gradient(to bottom,black 55%,transparent);`;return`<div style="position:absolute;left:0px;top:${offY}px;width:${mW2}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='bottom'){const ih=Math.floor(mH2*.4);const defMask=`mask-image:linear-gradient(to top,black 55%,transparent);-webkit-mask-image:linear-gradient(to top,black 55%,transparent);`;return`<div style="position:absolute;left:0px;top:${mH2-ih+offY}px;width:${mW2}px;height:${ih}px;${base}${fdOn?'':defMask}z-index:1;"></div>${fadeOverlay}`;}
-    if(pos==='center'){const sz=Math.min(mW2,mH2)*.45;return`<div style="position:absolute;left:50%;top:50%;transform:translate(calc(-50% + ${offX}px),calc(-50% + ${offY}px));width:${sz}px;height:${sz}px;${base}border-radius:50%;z-index:1;"></div>${fadeOverlay}`;}
+    if(pos==='bg')return wrap(`left:0;top:0;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);`,'',0)+fadeOverlay;
+    if(pos==='full')return wrap(`left:0;top:0;width:${mW2}px;height:${mH2}px;transform:translate(${offX}px,${offY}px);`,'',0)+`<div style="position:absolute;left:0px;top:0px;width:${mW2}px;height:${mH2}px;background:${bg};opacity:.45;z-index:1;"></div>`+fadeOverlay;
+    if(pos==='left'){const iw=Math.floor(mH2*.7);const ih=mH2-12;return wrap(`left:${6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;`,`border-radius:${rd}px;`,1)+fadeOverlay;}
+    if(pos==='right'){const iw=Math.floor(mH2*.65);const ih=mH2-12;return wrap(`left:${mW2-iw-6+offX}px;top:${6+offY}px;width:${iw}px;height:${ih}px;`,`border-radius:${rd}px;`,1)+fadeOverlay;}
+    if(pos==='top'){const ih=Math.floor(mH2*.45);const defMask=fdOn?'':`mask-image:linear-gradient(to bottom,black 55%,transparent);-webkit-mask-image:linear-gradient(to bottom,black 55%,transparent);`;return wrap(`left:0;top:${offY}px;width:${mW2}px;height:${ih}px;${defMask}`,`border-radius:${rd}px;`,1,fdOn?'':'bottom')+fadeOverlay;}
+    if(pos==='bottom'){const ih=Math.floor(mH2*.4);const defMask=fdOn?'':`mask-image:linear-gradient(to top,black 55%,transparent);-webkit-mask-image:linear-gradient(to top,black 55%,transparent);`;return wrap(`left:0;top:${mH2-ih+offY}px;width:${mW2}px;height:${ih}px;${defMask}`,`border-radius:${rd}px;`,1,fdOn?'':'top')+fadeOverlay;}
+    if(pos==='center'){const sz=Math.min(mW2,mH2)*.45;return wrap(`left:50%;top:50%;transform:translate(calc(-50% + ${offX}px),calc(-50% + ${offY}px));width:${sz}px;height:${sz}px;`,`border-radius:50%;`,1)+fadeOverlay;}
     return'';
   }
 
@@ -510,7 +563,7 @@ function buildTicket(side){
   const bImg=S.bID||S.bIU||'';
   const bImgHtml=imgDiv(bImg,S.bIP,S.bIOp,S.bIRd||4,S.bIOx,S.bIOy,S.bFdOn,S.bFdDir,S.bFdR,S.bFdCol||bg,S.bFdTr,mainW,mainH,{w:S.bIcW,h:S.bIcH,rx:S.bIcRx,ry:S.bIcRy,fx:S.bIfx,fy:S.bIfy});
 
-  const titleColorStyle=S.titleGrad?`background:linear-gradient(${S.titleGradDir},${colTitle},${S.titleGrad2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
+  const titleColorStyle=S.titleGrad?`background:linear-gradient(${S.titleGradDir},${colTitle} ${S.titleGradS||0}%,${S.titleGrad2} ${S.titleGradE||100}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
 
   // ✨ 제목, 부제목, 날짜/장소가 완전히 독립된 블록으로 나뉘어 개별적으로 위치 이동이 적용됩니다!
   const subDisp=ph(S.fSb,'부제목');
@@ -561,7 +614,7 @@ function buildTicket(side){
 
   const bttDisp=ph(S.bTt,'이벤트명');
   // 뒷면 이벤트 제목 색상/그라데이션 + B/I/U/S
-  const bttColorStyle=S.bttGrad?`background:linear-gradient(${S.bttGradDir},${colTitle},${S.bttGrad2});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
+  const bttColorStyle=S.bttGrad?`background:linear-gradient(${S.bttGradDir},${colTitle} ${S.bttGradS||0}%,${S.bttGrad2} ${S.bttGradE||100}%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;`:`color:${colTitle};`;
   const bttDeco=(S.bttU&&S.bttS2)?'text-decoration:underline line-through;':S.bttU?'text-decoration:underline;':S.bttS2?'text-decoration:line-through;':'';
   const bttStyleStr=`font-family:${fontTitle};${S.bttB?'font-weight:700;':''}${S.bttI?'font-style:italic;':''}${bttDeco}${bttDisp.ph?'color:'+phColor+';':bttColorStyle}`;
   const bcdDisp=ph(S.bCd,'TK-0000-00000');
@@ -645,7 +698,7 @@ function buildTicket(side){
   const mainContent=side==='front'?frontContent:backContent;
   const outerStyle=`box-sizing:border-box;display:inline-flex;flex-direction:${isL?'row':'column'};width:${W}px;height:${H}px;background:${bgCss};${stripStyle}${clip!=='none'?`clip-path:${clip};-webkit-clip-path:${clip};`:''}`;
 
-  return`<div style="${outerStyle}">
+  return`<div data-ticket-root="1" style="${outerStyle}">
     <div style="position:relative;width:${adjMainW}px;height:${adjMainH}px;flex:none;overflow:hidden;">${mainContent}</div>
     <div style="${isL?`width:${stub}px;height:${adjMainH}px;`:`height:${stub}px;width:${adjMainW}px;`}flex:none;overflow:hidden;">${stubContent}</div>
   </div>`;
@@ -727,7 +780,7 @@ function syncPair(id){
   num.addEventListener('input',e=>apply(e.target.value));
   if(rng)rng.addEventListener('input',e=>apply(e.target.value));
 }
-['fT_x','fT_y','fS_x','fS_y','fD_x','fD_y','bTxOx','bTxOy','bTt_x','bTt_y','bInf_x','bInf_y','bNt_x','bNt_y','fIOx','fIOy','bIOx','bIOy','fIcW','fIcH','fIcRx','fIcRy','bIcW','bIcH','bIcRx','bIcRy','fIfx','fIfy','bIfx','bIfy'].forEach(syncPair);
+['fT_x','fT_y','fS_x','fS_y','fD_x','fD_y','bTxOx','bTxOy','bTt_x','bTt_y','bInf_x','bInf_y','bNt_x','bNt_y','fIOx','fIOy','bIOx','bIOy','fIcW','fIcH','fIcRx','fIcRy','bIcW','bIcH','bIcRx','bIcRy','fIfx','fIfy','bIfx','bIfy','bgGradS','bgGradE','titleGradS','titleGradE','bttGradS','bttGradE'].forEach(syncPair);
 ['cBg','cAc','cTitle','cSub','cBody','bcTitle','bcSub','bcBody','bgGrad2','titleGrad2','bttGrad2','fFdCol','bFdCol'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',e=>{S[id]=e.target.value;render();});});
 ['fnT','fnS','fnB','bFnTitle','bFnSub','bFnBody','bFnTitleInline'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('change',e=>{S[id]=e.target.value;if(id==='bFnTitleInline'){S.fnT=e.target.value;}render();});});
 document.getElementById('stOn').addEventListener('change',e=>{S.stOn=e.target.checked;render();});
@@ -770,6 +823,115 @@ document.getElementById('btnMode').addEventListener('click',()=>{isDark=!isDark;
 // ✨ showBcTx/showBcCd 토글
 document.getElementById('showBcTx').addEventListener('change',e=>{S.showBcTx=e.target.checked;render();});
 document.getElementById('showBcCd').addEventListener('change',e=>{S.showBcCd=e.target.checked;render();});
+
+// ✨ 빠른 채우기(템플릿) — 테마별 문구 풀에서 랜덤 조합
+const TPL = {
+  concert: {
+    titles: ['LIVE TOUR','WORLD TOUR','ENCORE','FAN MEETING','SHOWCASE','CONCERT'],
+    subs: ['SPECIAL NIGHT','MIDNIGHT STAGE','UNTIL THE DAWN','LAST SHOW','FIRST ENCOUNTER','GOLDEN HOUR'],
+    events: ['MOONLIGHT SERENADE','STARRY NIGHTS','ECHO CHAMBER','BLOOM','NEON DREAMS','SILVER LINING','VELVET ROOM','AFTERGLOW','PARALLEL'],
+    seats: ['VIP A-12','R석 B-08','S석 C-21','1층 D-15','2층 E-07','VIP F-03','R석 G-11','S석 H-19'],
+    venues: ['올림픽홀','블루스퀘어','KSPO DOME','잠실 보조경기장','LG아트센터','예스24 라이브홀','롤링홀','상상마당','뮤즈홀','코엑스 아티움'],
+    prices: ['₩99,000','₩132,000','₩154,000','₩77,000','₩165,000','₩88,000'],
+    notes: ['공연 시작 30분 전 입장 가능 / 미취학 아동 입장 불가','티켓 분실 시 재발급 불가합니다 / 공연 중 사진 및 영상 촬영 금지','예매 후 환불은 공연 7일 전까지 가능합니다','지정 좌석제이며 입석은 불가합니다 / 음식물 반입 금지'],
+    ages: ['만 7세 이상','전체관람가','만 12세 이상','만 15세 이상']
+  },
+  musical: {
+    titles: ['MUSICAL','THE PHANTOM','CHICAGO','OPERA NIGHT','GRAND MUSICAL','BROADWAY'],
+    subs: ['ORIGINAL CAST','OPENING NIGHT','GALA SHOW','FINALE','MATINEE'],
+    events: ['MIDNIGHT IN PARIS','THE LAST WALTZ','RED VELVET','SCARLET ROOM','CRYSTAL PALACE','MOONRISE','HEARTBREAK HOTEL','EVERGREEN'],
+    seats: ['OP석 A-04','VIP B-12','R석 C-18','S석 D-09','A석 E-22'],
+    venues: ['샤롯데씨어터','블루스퀘어 신한카드홀','충무아트센터 대극장','예술의전당 오페라극장','LG아트센터','세종문화회관 대극장','디큐브아트센터'],
+    prices: ['₩140,000','₩99,000','₩77,000','₩55,000','₩165,000'],
+    notes: ['공연 시작 후 입장 제한 / 8세 이상 관람 권장','분실 티켓 재발급 불가 / 인터미션 20분 포함','휴대폰 전원은 꺼주시기 바랍니다','앙코르 종료 후 퇴장해 주세요'],
+    ages: ['만 8세 이상','만 13세 이상','만 15세 이상']
+  },
+  movie: {
+    titles: ['CINEMA','PREMIERE','MOVIE NIGHT','FILM FEST','SCREENING','SHOW TIME'],
+    subs: ['SPECIAL SCREENING','VIP PREMIERE','OPENING FILM','CLOSING NIGHT','DIRECTORS CUT'],
+    events: ['WHERE THE WIND BLOWS','PAPER MOON','THE LIGHTHOUSE','RAIN ON ME','LAST WINTER','SUMMER LETTERS','BLUE HOUR','NIGHT DRIVE'],
+    seats: ['G열 12','H열 08','J열 15','F열 04','K열 22','E열 11'],
+    venues: ['CGV 용산아이파크몰','메가박스 코엑스','롯데시네마 월드타워','CGV 압구정','메가박스 성수','CGV 왕십리','시네큐브 광화문','아트나인'],
+    prices: ['₩14,000','₩16,000','₩12,000','₩18,000','₩22,000'],
+    notes: ['상영 시작 10분 전 입장 권장 / 외부 음식물 반입 금지','상영 중 휴대폰 사용을 자제해주세요','쿠키 영상이 있습니다','자막 상영 / 12세 관람가'],
+    ages: ['전체관람가','12세 이상 관람가','15세 이상 관람가','청소년 관람불가']
+  },
+  festival: {
+    titles: ['FESTIVAL','SUMMER FEST','MUSIC FEST','ROCK FEST','THE FESTIVAL'],
+    subs: ['ONE DAY PASS','TWO DAY PASS','VIP PACKAGE','EARLY BIRD','FULL ACCESS'],
+    events: ['SUNSET BEACH','BLOOM IN GREEN','PARADISE ISLAND','GOLDEN WAVE','RIVERSIDE','NEON JUNGLE','OPEN FIELD','STARLIGHT'],
+    seats: ['스탠딩 GREEN','스탠딩 YELLOW','스탠딩 RED','VIP ZONE','PIT 구역','자유석'],
+    venues: ['난지한강공원','잠실종합운동장','월미도 특설무대','부산 다대포 해수욕장','과천 서울대공원','자라섬 페스티벌 파크','인천 송도 달빛축제공원'],
+    prices: ['₩99,000','₩132,000','₩187,000','₩220,000','₩66,000'],
+    notes: ['우천시에도 진행됩니다 / 우산은 반입 불가','캠핑 의자 반입 가능 / 외부 음식물 반입 금지','재입장 가능 / 손목밴드 분실 시 재입장 불가','주차장 협소 / 대중교통 이용 권장'],
+    ages: ['전체관람가','만 12세 이상','만 19세 이상']
+  },
+  exhibition: {
+    titles: ['EXHIBITION','ART SHOW','GALLERY','RETROSPECTIVE','SPECIAL EXHIBIT'],
+    subs: ['INVITATION','OPENING','PRIVATE VIEW','PRESS DAY','CLOSING WEEK'],
+    events: ['QUIET ROOM','LIGHT AND SHADOW','SOMEWHERE BETWEEN','FRAGMENTS','THE COLOR OF DAYS','UNTITLED','MEMORY OF GREEN','ROOMS WE LEAVE'],
+    seats: ['자유관람','가이드 투어 A','가이드 투어 B','조조 관람','심야 관람'],
+    venues: ['국립현대미술관 서울관','대림미술관','D뮤지엄','리움미술관','아라리오뮤지엄','예술의전당 한가람미술관','피크닉','갤러리현대'],
+    prices: ['₩18,000','₩22,000','₩15,000','₩28,000','₩12,000'],
+    notes: ['전시 작품 촬영 금지 / 음식물 반입 불가','관람 소요 시간 약 60분','마지막 입장 마감 1시간 전','도슨트 투어 매시 정각'],
+    ages: ['전체관람가','만 8세 이상 권장']
+  }
+};
+const TPL_LABELS = {
+  concert:{l1:'좌석',l4:'가격'}, musical:{l1:'좌석',l4:'가격'},
+  movie:{l1:'좌석',l4:'요금'}, festival:{l1:'구역',l4:'가격'},
+  exhibition:{l1:'관람',l4:'입장료'}
+};
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const padN = (n,len) => String(n).padStart(len,'0');
+const randDate = () => {
+  const y = 2024 + Math.floor(Math.random()*3);
+  const m = 1 + Math.floor(Math.random()*12);
+  const d = 1 + Math.floor(Math.random()*28);
+  const hh = 14 + Math.floor(Math.random()*8);
+  const mm = pick(['00','30']);
+  return `${y}.${padN(m,2)}.${padN(d,2)} ${padN(hh,2)}:${mm}`;
+};
+const randTicketCode = () => {
+  const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const L = letters[Math.floor(Math.random()*letters.length)] + letters[Math.floor(Math.random()*letters.length)];
+  return `${L}-${padN(Math.floor(Math.random()*9000)+1000,4)}-${padN(Math.floor(Math.random()*90000)+10000,5)}`;
+};
+const fillTemplate = (tplKey) => {
+  // 랜덤이면 테마 중 하나 선택
+  const themes = Object.keys(TPL);
+  const key = tplKey === 'random' ? pick(themes) : tplKey;
+  const t = TPL[key];
+  if (!t) return;
+  const setV = (id, v) => { const el = document.getElementById(id); if (el) { el.value = v; el.dispatchEvent(new Event('input', {bubbles:true})); } };
+  const date = randDate();
+  const venue = pick(t.venues);
+  const event = pick(t.events);
+  setV('fT', pick(t.titles));      // 앞면 제목
+  setV('fSb', pick(t.subs));       // 앞면 부제
+  setV('fDt', date);               // 앞면 날짜
+  setV('fVn', venue);              // 앞면 장소
+  setV('bTt', event);              // 뒷면 이벤트명
+  setV('bSt', pick(t.seats));      // 좌석
+  setV('bV2', date);               // 뒷면 날짜
+  setV('bV3', venue);              // 뒷면 장소
+  setV('bPr', pick(t.prices));     // 가격
+  setV('bNt', pick(t.notes));      // 안내사항
+  setV('bCd', randTicketCode());   // 티켓번호
+  setV('bcTx', 'ADMIT ONE');       // 바코드 텍스트
+  // 라벨도 테마에 맞게 (좌석/구역/관람, 가격/요금/입장료)
+  const labels = TPL_LABELS[key] || {l1:'좌석',l4:'가격'};
+  setV('bL1', labels.l1);
+  setV('bL4', labels.l4);
+  // 관람연령은 안내사항 끝에 합치는 게 자연스러움 (별도 필드가 없으므로 안내에 포함)
+  const age = pick(t.ages);
+  const nt = document.getElementById('bNt');
+  if (nt && age) { nt.value = nt.value + ' / ' + age; nt.dispatchEvent(new Event('input', {bubbles:true})); }
+  render();
+};
+document.querySelectorAll('.tplBtn').forEach(b => {
+  b.addEventListener('click', () => fillTemplate(b.dataset.tpl));
+});
 // ✨ BIUS 부제목(sB/sI/sU/sS2) + 이벤트명(bttB/bttI/bttU/bttS2)
 document.querySelectorAll('.sb2[data-f]').forEach(b=>{
   const k=b.dataset.f;
@@ -803,8 +965,8 @@ function getTargetHTML(target) {
       </div>
     </div>`;
   let content = '';
-  if (target === 'all' || target === 'front') content += respWrap('',f);
-  if (target === 'all' || target === 'back') content += respWrap('',b);
+  if (target === 'all' || target === 'front') content += respWrap('앞면', f);
+  if (target === 'all' || target === 'back') content += respWrap('뒷면', b);
   return content;
 }
 
@@ -879,11 +1041,12 @@ function urlToDataURL(url) {
     setTimeout(() => res(null), 9000);
   });
   // 프록시 후보들 (이미지 바이트를 그대로 돌려주는 것들)
+  // weserv 계열은 원본 크기 유지 위해 출력 옵션 미지정(기본 원본) + 무손실 png 강제
   const proxies = [
     u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
     u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-    u => 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//, '')),
-    u => 'https://wsrv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//, ''))
+    u => 'https://images.weserv.nl/?n=-1&output=png&url=' + encodeURIComponent(u.replace(/^https?:\/\//, '')),
+    u => 'https://wsrv.nl/?n=-1&output=png&url=' + encodeURIComponent(u.replace(/^https?:\/\//, ''))
   ];
   // 1차: 직접 fetch
   return fetch(url, { mode: 'cors' })
@@ -910,12 +1073,15 @@ function urlToDataURL(url) {
 
 function dP(side) {
   const el = document.createElement('div');
-  el.style.cssText = 'position:absolute; left:-9999px; top:-9999px;';
+  // 티켓 크기를 미리 계산해서 컨테이너에 명시 → 뷰포트 영향 차단
+  const ticketW = Math.max(150, S.tW);
+  const ticketH = Math.max(80, S.tH);
+  el.style.cssText = `position:absolute; left:-9999px; top:-9999px; width:${ticketW}px; height:${ticketH}px; overflow:visible;`;
   el.innerHTML = buildTicket(side);
   document.body.appendChild(el);
   const ticket = el.firstElementChild;
 
-  // ✨ background 단축 속성에서 URL 추출 (backgroundImage 개별속성은 innerHTML DOM에서 빈 값이라 안됨)
+  // ✨ 외부 이미지 URL 추출: style의 url(...) 처리 (블로그 호환 위해 img 태그 안 씀)
   const nodes = [];
   el.querySelectorAll('*').forEach(node => {
     const st = node.getAttribute('style') || '';
@@ -927,8 +1093,12 @@ function dP(side) {
     urlToDataURL(url).then(dataUrl => {
       if (dataUrl) {
         const st = node.getAttribute('style');
-        // url(...) 전체를 dataURL로 교체
         node.setAttribute('style', st.replace(/url\(\s*['"]?[^'")]+['"]?\s*\)/, `url("${dataUrl}")`));
+        // 같은 node가 .__tkimgwrap이면 레지스트리도 dataURL로 교체 (PNG 후처리용)
+        if (node.classList && node.classList.contains('__tkimgwrap')) {
+          const id = node.getAttribute('data-imgid');
+          if (id && window.__imgReg) window.__imgReg[id] = dataUrl;
+        }
         return true;
       }
       return false;
@@ -942,62 +1112,405 @@ function dP(side) {
     ticket.style.webkitClipPath = 'none';
   }
 
+  // ✨ S 상태에서 직접 배경 그라데이션 정보를 읽음
+  const bgGradInfo = S.bgGrad
+    ? `linear-gradient(${S.bgGradDir},${S.cBg} ${S.bgGradS||0}%,${S.bgGrad2} ${S.bgGradE||100}%)`
+    : null;
+  const willRedrawImages = el.querySelectorAll('.__tkimgwrap').length > 0;
+  let origBg = null;
+  if (willRedrawImages) {
+    // 이미지 후처리: 캡처본의 배경을 통째로 투명화 (배경은 이미지 레이어에서 그림)
+    origBg = ticket.getAttribute('style');
+    ticket.setAttribute('style', (origBg || '').replace(/background\s*:[^;]+(?:;|$)/g, 'background:transparent;'));
+  } else if (bgGradInfo) {
+    // 이미지 없고 그라데이션만 있음: 기존처럼 단색으로 임시 교체 → 캡처 후 캔버스에서 그라데이션 그림
+    origBg = ticket.getAttribute('style');
+    ticket.setAttribute('style', (origBg || '').replace(/background\s*:[^;]+(?:;|$)/g, `background:${S.cBg};`));
+  }
+  // ✨ background-clip:text 텍스트 그라데이션 처리
+  // 전략: 텍스트를 키컬러(마젠타 #FF00FF)로 렌더 → 캡처 후 그 픽셀만 마스크로
+  // 잡아 그라데이션을 입힘. (검정 대신 키컬러를 쓰면 어두운 배경에서도 안 헷갈림)
+  const textGradNodes = [];
+  el.querySelectorAll('*').forEach(node => {
+    const st = node.getAttribute('style') || '';
+    if (st.includes('background-clip:text') || st.includes('-webkit-text-fill-color:transparent')) {
+      textGradNodes.push({ node, origStyle: st });
+      let patched = st
+        .replace(/background\s*:[^;]+;?/g, '')
+        .replace(/-webkit-background-clip\s*:[^;]+;?/g, '')
+        .replace(/background-clip\s*:[^;]+;?/g, '')
+        .replace(/-webkit-text-fill-color\s*:[^;]+;?/g, '')
+        .replace(/color\s*:[^;]+;?/g, '');
+      patched += 'color:#FF00FF;';
+      node.setAttribute('style', patched);
+    }
+  });
+
   Promise.all(jobs).then(results => {
     const anyFailed = results.some(r => r === false);
-    // scale: 화질 4배, 큰 티켓은 상한(최대변 4000px)
-    const baseScale = 4;
-    const maxDim = 4000;
-    const longest = Math.max(ticket.offsetWidth, ticket.offsetHeight);
-    const scale = Math.min(baseScale, Math.max(2, maxDim / longest));
+    // scale: 3배 고정. <img> 태그는 html2canvas가 원본 해상도로 선명히 렌더링.
+    const scale = 3;
+    const ticketW = ticket.offsetWidth;
+    const ticketH = ticket.offsetHeight;
+
     html2canvas(ticket, {
       backgroundColor: null,
       scale: scale,
       useCORS: true,
       allowTaint: false,
       imageTimeout: 8000,
-      logging: false
-    }).then(canvas => {
-      let finalCanvas = canvas;
-      // ✨ clip-path가 있었으면 canvas에 직접 적용 (고품질 스무딩)
-      if (clipVal && clipVal !== 'none') {
-        finalCanvas = document.createElement('canvas');
-        finalCanvas.width = canvas.width;
-        finalCanvas.height = canvas.height;
-        const ctx = finalCanvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        const sx = canvas.width / ticket.offsetWidth;
-        ctx.save();
-        const insetM = clipVal.match(/inset\(0[^)]*round\s+(\d+)px\)/);
-        const polyM = clipVal.match(/polygon\(([^)]+)\)/);
-        if (insetM) {
-          const r = parseFloat(insetM[1]) * sx;
-          ctx.beginPath();
-          ctx.roundRect(0, 0, canvas.width, canvas.height, r);
-          ctx.clip();
-        } else if (polyM) {
-          const pts = polyM[1].split(',').map(p => {
-            const [xp, yp] = p.trim().split(/\s+/);
-            return [parseFloat(xp) / 100 * canvas.width, parseFloat(yp) / 100 * canvas.height];
-          });
-          ctx.beginPath();
-          pts.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
-          ctx.closePath();
-          ctx.clip();
-        }
-        ctx.drawImage(canvas, 0, 0);
-        ctx.restore();
+      logging: false,
+      width: ticketW,
+      height: ticketH,
+      windowWidth: ticketW,
+      windowHeight: ticketH,
+      x: 0,
+      y: 0,
+      onclone: (clonedDoc) => {
+        // 이미지 래퍼는 배경 url로 그려지지만, PNG는 캔버스에서 직접 그리므로 캡처본에선 배경 숨김.
+        clonedDoc.querySelectorAll('.__tkimgwrap').forEach(wrap => {
+          const id = wrap.getAttribute('data-imgid');
+          const src = id && window.__imgReg ? window.__imgReg[id] : '';
+          if (/^data:/.test(src)) {
+            // background-image만 끄고, opacity 0으로 만들어 그 자리가 투명 유지
+            wrap.style.setProperty('background-image', 'none', 'important');
+            wrap.style.setProperty('background', 'none', 'important');
+          }
+        });
       }
-      finalCanvas.toBlob(blob => {
-        dl(`ticket-${side}.png`, blob);
-        document.body.removeChild(el);
-        if (anyFailed) {
-          alert('일부 이미지를 변환하지 못했습니다.\n해당 이미지 서버가 외부 접근(CORS)을 막은 경우이며, "파일 업로드" 방식으로 추가하면 확실히 저장됩니다.');
+    }).then(canvas => {
+      // 임시 교체한 배경 복원
+      if (origBg !== null) ticket.setAttribute('style', origBg);
+      // 텍스트 그라데이션 복원
+      textGradNodes.forEach(({ node, origStyle }) => node.setAttribute('style', origStyle));
+
+      let finalCanvas = canvas;
+
+      // ✨ 배경 그라데이션이 있으면 Canvas에 직접 그려서 합성
+      // 이미지 후처리가 있으면 배경은 이미지 레이어에서 그리므로 여기선 건너뜀
+      if (bgGradInfo && !willRedrawImages) {
+        const gradCanvas = document.createElement('canvas');
+        gradCanvas.width = canvas.width;
+        gradCanvas.height = canvas.height;
+        const gCtx = gradCanvas.getContext('2d');
+        const parseLinearGrad = (str, w, h) => {
+          const inner = str.replace(/^linear-gradient\(\s*/, '').replace(/\)\s*$/, '');
+          const parts = inner.split(/,(?![^(]*\))/);
+          let angle = 135;
+          let colorStops = [];
+          let startIdx = 0;
+          const firstTrim = parts[0].trim();
+          if (firstTrim.endsWith('deg')) { angle = parseFloat(firstTrim); startIdx = 1; }
+          else if (firstTrim === 'to right') { angle = 90; startIdx = 1; }
+          else if (firstTrim === 'to left') { angle = 270; startIdx = 1; }
+          else if (firstTrim === 'to bottom') { angle = 180; startIdx = 1; }
+          else if (firstTrim === 'to top') { angle = 0; startIdx = 1; }
+          for (let i = startIdx; i < parts.length; i++) {
+            const p = parts[i].trim();
+            const m = p.match(/(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\)|[a-z]+)\s*(\d+(?:\.\d+)?%?)?/);
+            if (m) {
+              const raw = m[2];
+              const pct = raw ? parseFloat(raw) / (raw.endsWith('%') ? 100 : 1) : null;
+              colorStops.push({ color: m[1], pos: pct });
+            }
+          }
+          colorStops.forEach((s, i) => { if (s.pos === null) s.pos = i / Math.max(colorStops.length - 1, 1); });
+          const rad = (angle - 90) * Math.PI / 180;
+          const cx = w / 2, cy = h / 2;
+          const len = Math.abs(w * Math.sin(rad)) + Math.abs(h * Math.cos(rad));
+          const x0 = cx - Math.cos(rad) * len / 2, y0 = cy - Math.sin(rad) * len / 2;
+          const x1 = cx + Math.cos(rad) * len / 2, y1 = cy + Math.sin(rad) * len / 2;
+          return { x0, y0, x1, y1, colorStops };
+        };
+        const gd = parseLinearGrad(bgGradInfo, gradCanvas.width, gradCanvas.height);
+        const grad = gCtx.createLinearGradient(gd.x0, gd.y0, gd.x1, gd.y1);
+        gd.colorStops.forEach(s => { try { grad.addColorStop(Math.min(1, Math.max(0, s.pos)), s.color); } catch(e) {} });
+        gCtx.fillStyle = grad;
+        gCtx.fillRect(0, 0, gradCanvas.width, gradCanvas.height);
+        gCtx.drawImage(canvas, 0, 0);
+        finalCanvas = gradCanvas;
+      }
+
+      // ✨ 텍스트 그라데이션 후처리 (정석 마스킹 방식)
+      // 검정(#000)으로 찍힌 텍스트의 알파 형태를 마스크로 삼아 그라데이션을 입힘.
+      // 박스 전체를 덮지 않고 '텍스트 픽셀'에만 그라데이션이 적용되도록,
+      // 투명 캔버스에서 [그라데이션 → destination-in 텍스트마스크] 한 뒤 원본 위에 올림.
+      if (textGradNodes.length > 0) {
+        const sx = finalCanvas.width / ticket.offsetWidth;
+        const sy = finalCanvas.height / ticket.offsetHeight;
+        const tgCanvas = document.createElement('canvas');
+        tgCanvas.width = finalCanvas.width;
+        tgCanvas.height = finalCanvas.height;
+        const tgCtx = tgCanvas.getContext('2d');
+        tgCtx.drawImage(finalCanvas, 0, 0);
+        const ticketRect = ticket.getBoundingClientRect();
+
+        const parseGrad = (gstr, w, h) => {
+          const inner = gstr.replace(/^linear-gradient\(\s*/, '').replace(/\)\s*$/, '');
+          const parts = inner.split(/,(?![^(]*\))/);
+          let angle = 135, stops = [], si = 0;
+          const ft = parts[0].trim();
+          if (ft.endsWith('deg')) { angle = parseFloat(ft); si = 1; }
+          else if (ft === 'to right') { angle = 90; si = 1; }
+          else if (ft === 'to left') { angle = 270; si = 1; }
+          else if (ft === 'to bottom') { angle = 180; si = 1; }
+          else if (ft === 'to top') { angle = 0; si = 1; }
+          for (let i = si; i < parts.length; i++) {
+            const m2 = parts[i].trim().match(/(#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))\s*(\d+(?:\.\d+)?%)?/);
+            if (m2) stops.push({ color: m2[1], pos: m2[2] ? parseFloat(m2[2]) / 100 : null });
+          }
+          stops.forEach((s, i) => { if (s.pos === null) s.pos = i / Math.max(stops.length - 1, 1); });
+          const rad = (angle - 90) * Math.PI / 180;
+          const cx = w / 2, cy = h / 2, len = Math.abs(w * Math.sin(rad)) + Math.abs(h * Math.cos(rad));
+          return {
+            x0: cx - Math.cos(rad) * len / 2, y0: cy - Math.sin(rad) * len / 2,
+            x1: cx + Math.cos(rad) * len / 2, y1: cy + Math.sin(rad) * len / 2, stops
+          };
+        };
+
+        textGradNodes.forEach(({ node, origStyle }) => {
+          const rect = node.getBoundingClientRect();
+          const nx = Math.floor((rect.left - ticketRect.left) * sx);
+          const ny = Math.floor((rect.top - ticketRect.top) * sy);
+          const nw = Math.ceil(rect.width * sx);
+          const nh = Math.ceil(rect.height * sy);
+          if (nw <= 0 || nh <= 0) return;
+          const gradMatch = origStyle.match(/background\s*:\s*(linear-gradient\([^;]+\))/);
+          if (!gradMatch) return;
+
+          // 1) 텍스트 마스크: 마젠타(#FF00FF)로 찍힌 텍스트 픽셀만 알파로 남김
+          //    R 높음 + G 낮음 + B 높음 → 마젠타. 안티앨리어싱 경계도 부드럽게 반영.
+          const maskC = document.createElement('canvas');
+          maskC.width = nw; maskC.height = nh;
+          const maskCtx = maskC.getContext('2d');
+          maskCtx.drawImage(finalCanvas, nx, ny, nw, nh, 0, 0, nw, nh);
+          const imgData = maskCtx.getImageData(0, 0, nw, nh);
+          const d = imgData.data;
+          for (let i = 0; i < d.length; i += 4) {
+            const r = d[i], g = d[i+1], b = d[i+2];
+            // 마젠타다움: R·B는 높고 G는 낮을수록 1에 가까움
+            const magenta = Math.max(0, Math.min(r, b) - g) / 255; // 0~1
+            d[i] = 0; d[i+1] = 0; d[i+2] = 0;
+            d[i+3] = Math.round(Math.max(0, Math.min(1, magenta)) * 255);
+          }
+          maskCtx.putImageData(imgData, 0, 0);
+
+          // 2) 그라데이션 레이어 → destination-in 으로 텍스트 마스크만 남김
+          const gradC = document.createElement('canvas');
+          gradC.width = nw; gradC.height = nh;
+          const gCtx2 = gradC.getContext('2d');
+          const gi = parseGrad(gradMatch[1], nw, nh);
+          const lg = gCtx2.createLinearGradient(gi.x0, gi.y0, gi.x1, gi.y1);
+          gi.stops.forEach(s => { try { lg.addColorStop(Math.min(1, Math.max(0, s.pos)), s.color); } catch(e) {} });
+          gCtx2.fillStyle = lg;
+          gCtx2.fillRect(0, 0, nw, nh);
+          gCtx2.globalCompositeOperation = 'destination-in';
+          gCtx2.drawImage(maskC, 0, 0);
+
+          // 3) 원본 위에 '그라데이션 텍스트'만 올림 (배경/도트라인은 그대로 보존)
+          tgCtx.drawImage(gradC, nx, ny);
+        });
+        finalCanvas = tgCanvas;
+      }
+
+      // ✨ 도트라인 후처리: html2canvas 1.4.1이 repeating-linear-gradient(점선)를
+      // 제대로 못 그리므로 Canvas에 직접 점선을 찍어준다.
+      const dotNodes = el.querySelectorAll('.__dotline');
+      if (dotNodes.length > 0) {
+        const sx = finalCanvas.width / ticket.offsetWidth;
+        const sy = finalCanvas.height / ticket.offsetHeight;
+        const dCanvas = document.createElement('canvas');
+        dCanvas.width = finalCanvas.width;
+        dCanvas.height = finalCanvas.height;
+        const dCtx = dCanvas.getContext('2d');
+        dCtx.drawImage(finalCanvas, 0, 0);
+        const ticketRect = ticket.getBoundingClientRect();
+        dotNodes.forEach(node => {
+          const rect = node.getBoundingClientRect();
+          const nx = (rect.left - ticketRect.left) * sx;
+          const ny = (rect.top - ticketRect.top) * sy;
+          const nw = rect.width * sx;
+          const nh = rect.height * sy;
+          if (nw <= 0) return;
+          const rgb = node.getAttribute('data-dotcol') || '0,0,0';
+          // 원본 CSS: 0~2px 색, 2~8px 투명 → 2px 점 + 6px 간격(주기 8px)
+          const period = 8 * sx;     // 주기
+          const dotW = 2 * sx;       // 점 너비
+          const dotH = Math.max(nh, 2 * sy); // 점 높이(라인 두께)
+          const cy = ny + nh / 2 - dotH / 2;
+          dCtx.fillStyle = `rgba(${rgb},0.3)`;
+          for (let x = nx; x < nx + nw; x += period) {
+            dCtx.fillRect(x, cy, dotW, dotH);
+          }
+        });
+        finalCanvas = dCanvas;
+      }
+
+      // ✨ 이미지 후처리: 찌그러짐(cover 정확 계산) + 투명 페이드(캔버스 마스크) 해결.
+      //    html2canvas는 object-fit/mask-image를 무시하므로, 캡처 결과의 이미지 영역을
+      //    원본 이미지로 정확히 다시 그린다(cover 크롭 + 페이드 알파).
+      const imgWraps = Array.from(el.querySelectorAll('.__tkimgwrap'));
+      if (imgWraps.length > 0) {
+        const sx = finalCanvas.width / ticket.offsetWidth;
+        const sy = finalCanvas.height / ticket.offsetHeight;
+        const imgLayer = document.createElement('canvas');
+        imgLayer.width = finalCanvas.width;
+        imgLayer.height = finalCanvas.height;
+        const iCtx = imgLayer.getContext('2d');
+        iCtx.imageSmoothingEnabled = true;
+        iCtx.imageSmoothingQuality = 'high';
+        const ticketRect = ticket.getBoundingClientRect();
+
+        // ✨ 1단계: 티켓 배경(단색/그라데이션)을 imgLayer에 직접 그림
+        const tcW = finalCanvas.width, tcH = finalCanvas.height;
+        if (S.bgGrad) {
+          const dirMap = {'135deg':135,'90deg':90,'0deg':0,'45deg':45,'180deg':180,'270deg':270};
+          const angle = dirMap[S.bgGradDir] ?? 135;
+          const rad = (angle - 90) * Math.PI / 180;
+          const cx = tcW/2, cy = tcH/2;
+          const len = Math.abs(tcW*Math.sin(rad)) + Math.abs(tcH*Math.cos(rad));
+          const g = iCtx.createLinearGradient(cx-Math.cos(rad)*len/2, cy-Math.sin(rad)*len/2,
+                                              cx+Math.cos(rad)*len/2, cy+Math.sin(rad)*len/2);
+          g.addColorStop((S.bgGradS||0)/100, S.cBg);
+          g.addColorStop((S.bgGradE||100)/100, S.bgGrad2);
+          iCtx.fillStyle = g;
+        } else {
+          iCtx.fillStyle = S.cBg;
         }
-      }, 'image/png');
+        iCtx.fillRect(0, 0, tcW, tcH);
+
+        const drawJobs = imgWraps.map(node => new Promise(resolve => {
+          const id = node.getAttribute('data-imgid');
+          const src = id && window.__imgReg ? window.__imgReg[id] : '';
+          if (!src) { resolve(); return; }
+          if (/^https?:\/\//.test(src)) { resolve(); return; }
+          const fx = parseFloat(node.getAttribute('data-fx') || '50');
+          const fy = parseFloat(node.getAttribute('data-fy') || '50');
+          const op = parseFloat(node.getAttribute('data-op') || '1');
+          const fm = node.getAttribute('data-fm');
+          const fr = parseFloat(node.getAttribute('data-fr') || '0');
+          const dm = node.getAttribute('data-dm');
+          const rect = node.getBoundingClientRect();
+          const dx = (rect.left - ticketRect.left) * sx;
+          const dy = (rect.top - ticketRect.top) * sy;
+          const dw = rect.width * sx;
+          const dh = rect.height * sy;
+          if (dw <= 0 || dh <= 0) { resolve(); return; }
+          const wst = node.getAttribute('style') || '';
+          const brPct = wst.match(/border-radius\s*:\s*([\d.]+)%\s*\/\s*([\d.]+)%/);
+          const brCircle = /border-radius\s*:\s*50%/.test(wst);
+          const brPx = wst.match(/border-radius\s*:\s*([\d.]+)px/);
+          const img = new Image();
+          img.onload = () => {
+            const iw = img.naturalWidth, ih = img.naturalHeight;
+            if (!iw || !ih) { resolve(); return; }
+            const off = document.createElement('canvas');
+            off.width = Math.round(dw); off.height = Math.round(dh);
+            const oc = off.getContext('2d');
+            oc.imageSmoothingEnabled = true; oc.imageSmoothingQuality = 'high';
+            const cov = Math.max(off.width / iw, off.height / ih);
+            const sw = off.width / cov, sh = off.height / cov;
+            const sX = (iw - sw) * (fx / 100);
+            const sY = (ih - sh) * (fy / 100);
+            oc.drawImage(img, sX, sY, sw, sh, 0, 0, off.width, off.height);
+            const applyMask = (dir, rangePct) => {
+              let x0=0,y0=0,x1=0,y1=0;
+              const W=off.width, H=off.height;
+              if (dir==='right'){x0=0;x1=W;} else if(dir==='left'){x0=W;x1=0;}
+              else if(dir==='down'||dir==='bottom'){y0=0;y1=H;} else if(dir==='up'||dir==='top'){y0=H;y1=0;}
+              const g = oc.createLinearGradient(x0,y0,x1,y1);
+              const solid = Math.max(0, Math.min(1, (100 - rangePct) / 100));
+              g.addColorStop(0, 'rgba(0,0,0,1)');
+              g.addColorStop(solid, 'rgba(0,0,0,1)');
+              g.addColorStop(1, 'rgba(0,0,0,0)');
+              oc.globalCompositeOperation = 'destination-in';
+              oc.fillStyle = g;
+              oc.fillRect(0,0,W,H);
+              oc.globalCompositeOperation = 'source-over';
+            };
+            if (fm) applyMask(fm, fr);
+            else if (dm) applyMask(dm, 45);
+            iCtx.save();
+            iCtx.globalAlpha = op;
+            iCtx.beginPath();
+            if (brCircle) {
+              iCtx.ellipse(dx+dw/2, dy+dh/2, dw/2, dh/2, 0, 0, Math.PI*2);
+              iCtx.clip();
+            } else if (brPct) {
+              const r = Math.min(dw*(parseFloat(brPct[1])/100), dh*(parseFloat(brPct[2])/100));
+              iCtx.roundRect(dx, dy, dw, dh, r); iCtx.clip();
+            } else if (brPx) {
+              iCtx.roundRect(dx, dy, dw, dh, parseFloat(brPx[1])*sx); iCtx.clip();
+            } else {
+              iCtx.rect(dx, dy, dw, dh); iCtx.clip();
+            }
+            iCtx.drawImage(off, dx, dy);
+            iCtx.restore();
+            resolve();
+          };
+          img.onerror = () => resolve();
+          img.src = src;
+        }));
+
+        return Promise.all(drawJobs).then(() => {
+          const merged = document.createElement('canvas');
+          merged.width = finalCanvas.width;
+          merged.height = finalCanvas.height;
+          const mc = merged.getContext('2d');
+          mc.drawImage(imgLayer, 0, 0);      // 아래: [배경 + 이미지]
+          mc.drawImage(finalCanvas, 0, 0);   // 위: [텍스트·테두리·도트·오버레이]
+          finalCanvas = merged;
+          return finishCapture(finalCanvas);
+        });
+      }
+
+      return finishCapture(finalCanvas);
+
+
+      // ── 캡처 마무리: clip-path 적용 + 다운로드 ──
+      function finishCapture(fc) {
+        if (clipVal && clipVal !== 'none') {
+          const srcCanvas = fc;
+          const clippedCanvas = document.createElement('canvas');
+          clippedCanvas.width = srcCanvas.width;
+          clippedCanvas.height = srcCanvas.height;
+          const ctx = clippedCanvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          const sxc = srcCanvas.width / ticket.offsetWidth;
+          ctx.save();
+          const insetM = clipVal.match(/inset\(0[^)]*round\s+(\d+)px\)/);
+          const polyM = clipVal.match(/polygon\(([^)]+)\)/);
+          if (insetM) {
+            const r = parseFloat(insetM[1]) * sxc;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, srcCanvas.width, srcCanvas.height, r);
+            ctx.clip();
+          } else if (polyM) {
+            const pts = polyM[1].split(',').map(p => {
+              const [xp, yp] = p.trim().split(/\s+/);
+              return [parseFloat(xp) / 100 * srcCanvas.width, parseFloat(yp) / 100 * srcCanvas.height];
+            });
+            ctx.beginPath();
+            pts.forEach(([x, y], i) => i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y));
+            ctx.closePath();
+            ctx.clip();
+          }
+          ctx.drawImage(srcCanvas, 0, 0);
+          ctx.restore();
+          fc = clippedCanvas;
+        }
+        fc.toBlob(blob => {
+          dl(`ticket-${side}.png`, blob);
+          if (el.parentNode) document.body.removeChild(el);
+          if (anyFailed) {
+            alert('일부 이미지를 변환하지 못했습니다.\n해당 이미지 서버가 외부 접근(CORS)을 막은 경우이며, "파일 업로드" 방식으로 추가하면 확실히 저장됩니다.');
+          }
+        }, 'image/png');
+      }
     }).catch(err => {
       console.error('PNG 캡처 에러:', err);
-      document.body.removeChild(el);
+      if (el.parentNode) document.body.removeChild(el);
       alert('PNG 저장 중 오류가 발생했습니다.');
     });
   });
